@@ -12,29 +12,20 @@ fun Routing.skipnRouting(app: HTML.() -> Unit, endpoints: Routing.() -> Unit) {
 
     suspend fun PipelineContext<Unit, ApplicationCall>.serveApp() {
         val start = System.currentTimeMillis()
-        call.respondSkipnHtml(app, HttpStatusCode.OK)
+        call.respondSkipnHtml(app)
         println("Measured: ${System.currentTimeMillis() - start}ms")
     }
 
     get("/") {
-        try {
-            serveApp()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        serveApp()
     }
-
     get("/{ROUTE}") {
-        try {
-            serveApp()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        serveApp()
     }
 
-    get("/favicon.ico") {
-        println("SHOULD RETURN FAVICON")
-    }
+//    get("/favicon.ico") {
+//        println("SHOULD RETURN FAVICON")
+//    }
 
     static("public") {
         resources("public")

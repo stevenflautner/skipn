@@ -70,7 +70,7 @@ class JSDOMBuilder<out R : HTMLElement>(val document : Document, override val ro
 
         val element = path.last()
 
-        ascendBuilder(element.id)
+        ascend(element.id)
 
         lastLeaved = path.removeAt(path.lastIndex)
     }

@@ -1,5 +1,8 @@
 package io.skipn
 
+import io.ktor.application.*
+import io.skipn.platform.SkipnResources
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
 import kotlinx.html.consumers.DelayedConsumer
 import kotlinx.html.consumers.FinalizeConsumer
@@ -26,3 +29,11 @@ fun FlowContent.prepareElement(): String {
     return id
 }
 
+actual class SkipnContext(route: String, val applicationCall: ApplicationCall) {
+
+    actual var isInitializing = true
+    actual var route = MutableStateFlow(Route(route))
+    actual val points = Elements()
+    actual val resources = SkipnResources()
+
+}

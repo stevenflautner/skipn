@@ -6,12 +6,16 @@ import io.skipn.Endpoint
 import io.skipn.platform.DEV
 import io.skipn.SkipnContext
 import io.skipn.api
+import io.skipn.utils.decodeFromStringStatic
+import io.skipn.utils.encodeToStringStatic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.getContextualOrDefault
+import kotlinx.serialization.serializer
 
 actual inline fun <reified RESP : Any> loader(
     skipnContext: SkipnContext,
@@ -63,16 +67,18 @@ actual class LoadTask<RESP : Any> actual constructor(
     }
 }
 
+@OptIn(InternalSerializationApi::class)
 actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
+        skipnContext: SkipnContext,
         endpoint: Endpoint<REQ, RESP>,
         request: REQ
 ): suspend () -> RESP = {
     val post = api.post<String>(endpoint.route) {
         contentType(ContentType.Application.Json)
 
-        body = Json.encodeToString(request)
+        body = Json.encodeToStringStatic(request)
     }
 
-    // TODO Update once overload resolution ambiguity is resolved
-    Json.decodeFromString(Json.serializersModule.getContextualOrDefault(), post)
+    Json.decodeFromStringStatic(post)
+//    Json.decodeFromString(Json.serializersModule.getContextualOrDefault(), post)
 }

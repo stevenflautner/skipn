@@ -1,7 +1,9 @@
 package io.skipn
 
 import io.skipn.platform.DEV
+import io.skipn.platform.SkipnResources
 import io.skipn.utils.byId
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
@@ -36,3 +38,11 @@ fun FlowContent.prepareElement(): Element {
     else getUnderlyingHtmlElement()
 }
 
+actual class SkipnContext(route: String) {
+
+    actual var isInitializing = true
+    actual var route = MutableStateFlow(Route(route))
+    actual val points = Elements()
+    actual val resources = SkipnResources()
+
+}

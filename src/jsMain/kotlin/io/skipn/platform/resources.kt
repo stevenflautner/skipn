@@ -2,8 +2,8 @@ package io.skipn.platform
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.modules.getContextualOrDefault
 import io.skipn.utils.require
+import kotlinx.serialization.json.decodeFromJsonElement
 
 actual fun loadResourceString(src: String): String {
     return require(src)
@@ -20,14 +20,10 @@ actual class SkipnResources actual constructor() {
                 "when trying to load ${T::class}")
         id++
 
-        // TODO Update once overload resolution ambiguity is resolved
-        return Json.decodeFromJsonElement(
-                Json.serializersModule.getContextualOrDefault(),
-                jsonElement)
+        return Json.decodeFromJsonElement(jsonElement)
     }
 
     fun init(json: String) {
-        // TODO Update once overload resolution ambiguity is resolved
         resources = Json.decodeFromString(JsonObject.serializer(), json)
     }
 }

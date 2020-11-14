@@ -3,22 +3,21 @@
 
 package io.skipn
 
-import io.skipn.notifiers.StatefulValue
 import io.skipn.platform.SkipnResources
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
-class SkipnContext {
+class Route(val route: String, val oldRoute: String? = null)
 
-    lateinit var route: StatefulValue<String>
-    val points = Elements()
-    var isInitializing = true
-    val resources = SkipnResources()
+expect class SkipnContext {
 
-    fun init(route: String) {
-        this.route = StatefulValue(route)
-    }
+    var isInitializing: Boolean
+    var route: MutableStateFlow<Route>
+    val points: Elements
+    val resources: SkipnResources
+
 }
 
 class Elements {

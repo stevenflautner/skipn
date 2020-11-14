@@ -6,7 +6,9 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import io.skipn.utils.buildApiJson
 import kotlinx.html.HTML
+import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 fun Application.Skipn(
@@ -14,7 +16,7 @@ fun Application.Skipn(
     endpoints: Routing.() -> Unit
 ) {
     install(ContentNegotiation) {
-        json()
+        json(buildApiJson())
 
         install(StatusPages) {
             exception<Exception> { cause ->

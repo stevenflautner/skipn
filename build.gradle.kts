@@ -1,7 +1,4 @@
-import java.util.UUID
-import java.util.Date
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
-import java.net.URI
+import java.util.*
 
 plugins {
     kotlin("multiplatform") version "1.4.10"
@@ -9,7 +6,7 @@ plugins {
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.1b"
+version = "0.0.91"
 val kversion = "1.4.1"
 
 repositories {
@@ -42,8 +39,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
                 implementation("io.ktor:ktor-client-core:$kversion")
                 implementation("io.ktor:ktor-client-json:$kversion")
                 implementation("io.ktor:ktor-client-serialization:$kversion")

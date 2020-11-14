@@ -10,11 +10,11 @@ import kotlinx.html.HtmlTagMarker
 //expect fun FlowContent.StatefulBuilder(predicate: StatefulBuilderPredicate, node: DIV.() -> Unit)
 //@HtmlTagMarker
 //expect fun <T: Any> FlowContent.StatefulBuilder(predicate: StatefulBuilderValuePredicate<T>, node: DIV.(T) -> Unit)
-@HtmlTagMarker
-expect fun <V: Any?, T> FlowContent.divOf(stateful: StatefulValue<V>, node: DIV.(V) -> T)
+//@HtmlTagMarker
+//expect fun <V: Any?, T> FlowContent.divOf(stateful: StatefulValue<V>, node: DIV.(V) -> T)
 
-@HtmlTagMarker
-expect fun <T: Any, R: Any> FlowContent.divOf(builder: StatefulFilterBuilder<T, R>, node: DIV.(R) -> Unit)
+//@HtmlTagMarker
+//expect fun <T: Any, R: Any> FlowContent.divOf(builder: StatefulFilterBuilder<T, R>, node: DIV.(R) -> Unit)
 
-@HtmlTagMarker
-expect fun FlowContent.divOf(stateful: Stateful, node: DIV.() -> Unit)
+//@HtmlTagMarker
+//expect fun FlowContent.divOf(stateful: Stateful, node: DIV.() -> Unit)

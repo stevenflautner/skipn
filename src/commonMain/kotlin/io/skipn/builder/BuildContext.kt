@@ -3,21 +3,20 @@
 
 package io.skipn.builder
 
-import io.skipn.notifiers.StatefulNotifier
+import io.skipn.provide.PinningContext
+import kotlinx.coroutines.*
 import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
-import kotlin.reflect.KClass
-
-typealias StateBucket = ArrayList<StatefulNotifier<*>>
 
 class BuildContext(
     val id: String,
-    val states: HashMap<String, StateBucket> = hashMapOf(),
-    val statesByClasses: HashMap<KClass<*>, Any> = hashMapOf()
+    val pinningContext: PinningContext
 ) {
     var childBuilderContexts: ArrayList<BuildContext>? = null
     private var onDisposeListeners: ArrayList<() -> Unit>? = null
+
+    lateinit var coroutineScope: CoroutineScope
 
     fun addChild(context: BuildContext) {
         val childBuilderContexts = childBuilderContexts ?: arrayListOf<BuildContext>().also {
@@ -47,6 +46,9 @@ class BuildContext(
         onDisposeListeners.add(onDispose)
     }
 
+    fun launch(block: suspend CoroutineScope.() -> Unit) {
+        coroutineScope.launch(block = block)
+    }
 }
 expect val FlowContent.buildContext: BuildContext
 
@@ -55,13 +57,15 @@ interface Builder {
     var currentBuildContext: BuildContext
     val builderContextTree: ArrayDeque<BuildContext>
 
-    fun createContext(id: String): BuildContext {
+    fun createContextAndDescend(id: String): BuildContext {
         // Creates a copy of the states
         val context = BuildContext(
             id,
-            HashMap(currentBuildContext.states),
-            HashMap(currentBuildContext.statesByClasses)
+            PinningContext(parent = currentBuildContext.pinningContext)
         )
+        context.coroutineScope = CoroutineScope(SupervisorJob(currentBuildContext.coroutineScope.coroutineContext.job))
+
+        descendBuilder(context)
         return context
     }
 
@@ -71,26 +75,28 @@ interface Builder {
         currentBuildContext = context
     }
 
-    fun ascendBuilder(id: String) {
-        descendState(id)
+    // Ascends the Builder with the
+    // id of the element that ended
+    fun ascend(id: String) {
+        ascendContext(id)
+    }
+
+    private fun ascendContext(elemId: String) {
+        currentBuildContext.pinningContext.ascend(elemId)
 
         // Current builder ended should ascend the build context
-        if (currentBuildContext.id == id) {
+        // Leave the root in the context tree
+        if (currentBuildContext.id == elemId && builderContextTree.size > 1) {
             // In DEV mode the root #skipn-app div ascends
             // therefore we should no longer advance to the body & html tags
             // So leave root build context as current
-            if (builderContextTree.size == 1) return
+//            if (builderContextTree.size == 1) return
             builderContextTree.removeLast()
             currentBuildContext = builderContextTree.last()
         }
     }
+}
 
-    private fun descendState(id: String) {
-        val stateBucket = rootBuildContext.states[id] ?: return
-
-        stateBucket.forEach { state ->
-            rootBuildContext.statesByClasses.remove(state::class)
-        }
-        rootBuildContext.states.remove(id)
-    }
+fun FlowContent.launch(block: suspend CoroutineScope.() -> Unit) {
+    buildContext.launch(block = block)
 }

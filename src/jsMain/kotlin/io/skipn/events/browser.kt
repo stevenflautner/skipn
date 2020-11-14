@@ -1,17 +1,22 @@
 package io.skipn.events
 
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.skipn.*
 import io.skipn.browser.BrowserElement
 import io.skipn.builder.builder
-import io.skipn.skipnContext
-import io.skipn.prepareElement
 import io.skipn.form.FormState
-import io.skipn.Endpoint
+import io.skipn.builder.buildContext
+import io.skipn.form.FormBuilder
+import io.skipn.utils.decodeFromStringStatic
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.html.FORM
 import kotlinx.html.FlowContent
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.getContextualOrDefault
 import org.w3c.dom.GlobalEventHandlers
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.MutationObserver
@@ -35,7 +40,8 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
 }
 
 @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
-actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: () -> Unit) {
+actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: (() -> Unit)?) {
+    if (onClick == null) return
     val elem = prepareElement() as GlobalEventHandlers
 
     elem.onclick = {
@@ -75,49 +81,37 @@ class JSIterator<T>(private val jsObject: dynamic) : AbstractIterator<T>() {
 }
 fun FormData.keys() = JSIterator<String>(this.asDynamic().keys())
 
-actual inline fun <reified RESP: Any> FORM.submitHandler(
-        endpoint: Endpoint<*, RESP>, formState: FormState,
+actual fun FORM.preventDefaultSubmit() {
+    val form = prepareElement() as HTMLFormElement
+    form.onsubmit = {
+        it.preventDefault()
+    }
+}
+
+actual inline fun <reified RESP: Any> FORM.attachSubmitHandler(
+        endpoint: FormEndpoint<*, RESP>,
+        builder: FormBuilder,
         crossinline onSuccess: (RESP) -> Unit
 ) : () -> Unit {
-    val form = prepareElement() as HTMLFormElement
-
-    form.addEventListener("submit", {
-        it.preventDefault()
-    })
-
-    val submit = {
-        if (formState.validateAll()) {
-            window.fetch(endpoint.route, init = RequestInit(
-                method = "post",
-                body = FormData(form)
-            )).then { response ->
-                if (response.status == 200.toShort()) {
-                    response.json()
-                } else
-                    println("there was an error...${response.status}")
-            }.then { json: dynamic ->
-                // TODO Update once overload resolution ambiguity is resolved
-                val data = Json.decodeFromString<RESP>(
-                    Json.serializersModule.getContextualOrDefault(),
-                    JSON.stringify(json)
-                )
-                onSuccess(data)
-            }
-        }
-
-//        GlobalScope.launch {
-////            val response = api.post<RESP>(endpoint.route) {
-////                body = FormData(form)
-////                body = MultiPartFormDataContent()
+//    val form = prepareElement() as HTMLFormElement
+//
+//    val submit = {
+//        if (builder.validateAll()) {
+////            GlobalScope.launch {
+////                api.post<RESP>(endpoint.route) {
+////
+////                }
 ////            }
+//            postFormLegacyApi(endpoint, form, onSuccess)
 //        }
-    }
-
-    form.onsubmit = { e ->
-        e.preventDefault()
-        submit()
-    }
-    return submit
+//    }
+//
+//    form.onsubmit = { e ->
+//        e.preventDefault()
+//        submit()
+//    }
+//    return submit
+    return {}
 }
 
 //@Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")

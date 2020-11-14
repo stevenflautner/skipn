@@ -27,7 +27,7 @@ fun refuseEmpty(value: String): String {
 
 //val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
-suspend inline fun <reified T: Any> ApplicationCall.parseMultipart(): T {
+suspend inline fun <reified T: Any> ApplicationCall.parseMultipart(): Map<String, Any?> {
     val data = hashMapOf<String, Any?>()
     val multipart = receiveMultipart()
 
@@ -108,6 +108,10 @@ suspend inline fun <reified T: Any> ApplicationCall.parseMultipart(): T {
         part.dispose()
     }
 
+    return data
+}
+
+inline fun <reified T: Any> convertMapToInstance(data: Map<String, Any?>): T {
     val params = arrayListOf<Any?>()
     T::class.primaryConstructor!!.parameters.forEach { constructorParam ->
         val elem = data[constructorParam.name]

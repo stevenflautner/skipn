@@ -39,8 +39,9 @@ actual inline fun <reified RESP : Any> loader(
 }
 
 actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
-        endpoint: Endpoint<REQ, RESP>,
-        request: REQ
+    skipnContext: SkipnContext,
+    endpoint: Endpoint<REQ, RESP>,
+    request: REQ
 ): suspend () -> RESP = {
-    endpoint.implementedFunc(request)
+    endpoint.implementedFunc(skipnContext.applicationCall, request)
 }

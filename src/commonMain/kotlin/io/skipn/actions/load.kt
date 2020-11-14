@@ -9,12 +9,13 @@ import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 expect inline fun <reified RESP : Any> loader(
-        skipnContext: SkipnContext,
-        noinline load: suspend () -> RESP,
-        noinline onSuccess: ((RESP) -> Unit)?
+    skipnContext: SkipnContext,
+    noinline load: suspend () -> RESP,
+    noinline onSuccess: ((RESP) -> Unit)?
 ) : LoadTask<RESP>
 
 expect inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
+    skipnContext: SkipnContext,
     endpoint: Endpoint<REQ, RESP>,
     request: REQ
 ) : suspend () -> RESP
@@ -27,29 +28,19 @@ expect class LoadTask<RESP : Any>(load: suspend () -> RESP, onSuccess: ((RESP) -
     fun cancel()
 }
 
-//inline fun <reified REQ: Any, reified RESP: Any> SkipnContext.load(
-//        endpoint: Endpoint<REQ, RESP>,
-//        request: REQ,
-//        noinline onLoaded: (RESP) -> Unit)
-//        = loader(
-//            this, endpointFunc(endpoint, request), onLoaded
-//        )
-
 inline fun <reified REQ: Any, reified RESP: Any> SkipnContext.load(
         endpoint: Endpoint<REQ, RESP>,
         request: REQ,
         body: LoadBuilder<REQ, RESP>.() -> Unit): LoadTask<RESP> {
 
     val builder = LoadBuilder(endpoint).apply(body)
-    return loader(this, endpointFunc(endpoint, request), builder.onSuccess)
+    return loader(this, endpointFunc(this, endpoint, request), builder.onSuccess)
 }
 
 class LoadBuilder<REQ: Any, RESP: Any>(private val endpoint: Endpoint<REQ, RESP>) {
     var onSuccess: ((RESP) -> Unit)? = null
 }
-//inline fun <reified REQ: Any> LoadBuilder<REQ, *>.send(request: () -> REQ) {
-//    this.request = request()
-//}
+
 fun <RESP: Any> LoadBuilder<*, RESP>.onSuccess(onSuccess: (RESP) -> Unit) {
     this.onSuccess = onSuccess
 }
