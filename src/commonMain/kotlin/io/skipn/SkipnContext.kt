@@ -3,6 +3,7 @@
 
 package io.skipn
 
+import io.skipn.builder.buildContext
 import io.skipn.platform.SkipnResources
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
@@ -27,4 +28,5 @@ class Elements {
     fun generateIdInt() = compId++
 }
 
-expect val FlowContent.skipnContext : SkipnContext
+val FlowContent.skipnContext: SkipnContext
+    get() = buildContext.skipnContext

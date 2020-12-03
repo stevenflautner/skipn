@@ -6,14 +6,13 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import io.skipn.html.HtmlApp
 import io.skipn.utils.buildApiJson
-import kotlinx.html.HTML
-import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 fun Application.Skipn(
-    app: HTML.() -> Unit,
-    endpoints: Routing.() -> Unit
+        app: HtmlApp.() -> Unit,
+        endpoints: Routing.() -> Unit
 ) {
     install(ContentNegotiation) {
         json(buildApiJson())

@@ -157,23 +157,23 @@ open class HTML(initialAttributes : Map<String, String>, override val consumer :
     }
 
 }
-///**
-// * Document body
-// */
-//@HtmlTagMarker
-//inline fun HTML.body(classes : String? = null, crossinline block : BODY.() -> Unit = {}) : Unit = BODY(attributesMapOf("class", classes), consumer).visit(block)
+/**
+ * Document body
+ */
+@HtmlTagMarker
+inline fun HTML.body(classes : String? = null, crossinline block : BODY.() -> Unit = {}) : Unit = BODY(attributesMapOf("class", classes), consumer).visit(block)
 
-///**
-// * Document head
-// */
-//@HtmlTagMarker
-//inline fun HTML.head(crossinline block : HEAD.() -> Unit = {}) : Unit = HEAD(emptyMap, consumer).visit(block)
-//@Deprecated("This tag doesn't support content or requires unsafe (try unsafe {})")
-//@Suppress("DEPRECATION")
-///**
-// * Document head
-// */
-//@HtmlTagMarker
-//fun HTML.head(content : String = "") : Unit = HEAD(emptyMap, consumer).visit({+content})
+/**
+ * Document head
+ */
+@HtmlTagMarker
+inline fun HTML.head(crossinline block : HEAD.() -> Unit = {}) : Unit = HEAD(emptyMap, consumer).visit(block)
+@Deprecated("This tag doesn't support content or requires unsafe (try unsafe {})")
+@Suppress("DEPRECATION")
+/**
+ * Document head
+ */
+@HtmlTagMarker
+fun HTML.head(content : String = "") : Unit = HEAD(emptyMap, consumer).visit({+content})
 
 

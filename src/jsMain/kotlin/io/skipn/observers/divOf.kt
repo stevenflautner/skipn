@@ -3,12 +3,12 @@ package io.skipn.observers
 import io.skipn.builder.BuildContext
 import io.skipn.builder.buildContext
 import io.skipn.builder.builder
+import io.skipn.html.create
 import io.skipn.prepareElement
 import kotlinx.browser.document
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.html.*
-import kotlinx.html.dom.create
 import org.w3c.dom.Element
 
 @HtmlTagMarker
@@ -28,13 +28,7 @@ actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T)
         // first value emitted
         parentScope.launch {
             stateFlow.drop(1).collect { value ->
-                // Cancel the current coroutine context
-                // and replace it with a new one
-                context.coroutineScope.cancel()
-
-                // Create new coroutine scope
-                // and rebuild the child tree with it
-                context.coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
+                context.cancelAndCreateScope(parentScope)
                 context.launch {
                     element = replaceElement(element, context) {
                         node(value)
@@ -71,13 +65,7 @@ actual fun FlowContent.divOf(
             // Drop all values in the replay cache
             // So we only notify newly emitted values
             flow.drop(drop).collect {
-                // Cancel the current coroutine context
-                // and replace it with a new one
-                context.coroutineScope.cancel()
-
-                // Create new coroutine scope
-                // and rebuild the child tree with it
-                context.coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
+                context.cancelAndCreateScope(parentScope)
                 context.coroutineScope.launch {
                     element = replaceElement(element, context) {
                         node()
@@ -96,4 +84,9 @@ private fun replaceElement(element: Element, context: BuildContext, node: DIV.()
     }
     element.replaceWith(newElement)
     return newElement
+}
+
+@HtmlTagMarker
+actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {
+    divOf(flow.stateIn(buildContext.coroutineScope, SharingStarted.Eagerly, initialValue), node)
 }

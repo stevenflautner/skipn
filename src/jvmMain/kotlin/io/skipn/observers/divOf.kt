@@ -4,6 +4,7 @@ import io.skipn.prepareElement
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker
@@ -28,5 +29,13 @@ actual fun FlowContent.divOf(
     div {
         prepareElement()
         node()
+    }
+}
+
+@HtmlTagMarker
+actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {
+    div {
+        prepareElement()
+        node(initialValue)
     }
 }

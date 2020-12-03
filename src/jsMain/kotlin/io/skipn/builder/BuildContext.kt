@@ -1,36 +1,67 @@
 package io.skipn.builder
 
+import io.skipn.SkipnContext
+import io.skipn.ensureRunAfterInitialization
+import io.skipn.provide.PinningContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import kotlinx.html.FlowContent
-import kotlinx.html.consumers.DelayedConsumer
-import kotlinx.html.consumers.FinalizeConsumer
-import kotlinx.html.dom.JSDOMBuilder
-import kotlinx.html.stream.HTMLStreamBuilder
 
-actual val FlowContent.buildContext: BuildContext
-    get() = builder.currentBuildContext
+actual class BuildContext actual constructor(
+        id: String,
+        skipnContext: SkipnContext,
+        pinningContext: PinningContext
+) : BuildContextBase(id, skipnContext, pinningContext) {
 
-val FlowContent.builder: Builder
-    get() {
-        var consumer = consumer
+    lateinit var coroutineScope: CoroutineScope
 
-        // Dynamically built tree
-        if (consumer is JSDOMBuilder)
-            return consumer
-        if (consumer is FinalizeConsumer<*, *>) {
-            consumer = consumer.downstream
-            if (consumer is JSDOMBuilder)
-                return consumer
-        }
-
-        // Server preloaded tree
-        if (consumer is DelayedConsumer) {
-            consumer = consumer.downstream
-            if (consumer is FinalizeConsumer<*, *>) {
-                consumer = consumer.downstream
-                if (consumer is HTMLStreamBuilder)
-                    return consumer
+    // Launches coroutine only if the current coroutineScope did not
+    // change while the initialization process ran
+    // Calls the function regularly if invoked after the initialization phase
+    actual fun launch(block: suspend CoroutineScope.() -> Unit) {
+        val targetScope = coroutineScope
+        ensureRunAfterInitialization {
+            if (targetScope == coroutineScope) {
+                targetScope.launch(block = block)
             }
         }
-
-        throw Exception("JSDomBuilder could not be found while building")
     }
+
+    fun cancelAndCreateScope(parentScope: CoroutineScope) {
+        // Cancel the current coroutine context
+        // and replace it with a new one
+        coroutineScope.cancel()
+
+        // Create new coroutine scope
+        // and rebuild the child tree with it
+        coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
+    }
+
+    actual companion object {
+        actual fun create(id: String, parent: BuildContext): BuildContext {
+            return BuildContext(
+                    id,
+                    parent.skipnContext,
+                    PinningContext(parent = parent.pinningContext)
+            ).apply {
+                coroutineScope = CoroutineScope(SupervisorJob(parent.coroutineScope.coroutineContext.job))
+            }
+        }
+        actual fun createRoot(skipnContext: SkipnContext): BuildContext {
+            return BuildContext(
+                    "skipn-root",
+                    skipnContext,
+                    PinningContext(parent = null)
+            ).apply {
+                coroutineScope = CoroutineScope(SupervisorJob())
+            }
+        }
+    }
+}
+
+//actual fun <T, FLOW : Flow<T>, RES> FlowContent.stateIn(
+//    flow: FLOW,
+//    initialValue: (FLOW) -> RES
+//) {
+//    flow.stateIn(buildContext.coroutineScope, SharingStarted.Eagerly, initialValue(flow))
+//}

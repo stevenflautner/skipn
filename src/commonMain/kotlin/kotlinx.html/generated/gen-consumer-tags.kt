@@ -306,12 +306,12 @@ inline fun <T, C : TagConsumer<T>> C.hr(classes : String? = null, crossinline bl
 @Deprecated("This tag doesn't support content or requires unsafe (try unsafe {})")
 @Suppress("DEPRECATION")
 /**
- * Document components.root element
+ * Document root element
  */
 @HtmlTagMarker
 fun <T, C : TagConsumer<T>> C.html(content : String = "", namespace : String? = null) : T = HTML(emptyMap, this, namespace).visitAndFinalize(this, {+content})
 /**
- * Document components.root element
+ * Document root element
  */
 @HtmlTagMarker
 inline fun <T, C : TagConsumer<T>> C.html(namespace : String? = null, crossinline block : HTML.() -> Unit = {}) : T = HTML(emptyMap, this, namespace).visitAndFinalize(this, block)

@@ -73,12 +73,12 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
         endpoint: Endpoint<REQ, RESP>,
         request: REQ
 ): suspend () -> RESP = {
-    val post = api.post<String>(endpoint.route) {
+    api.post(endpoint.route) {
         contentType(ContentType.Application.Json)
 
-        body = Json.encodeToStringStatic(request)
+        body = request
     }
 
-    Json.decodeFromStringStatic(post)
+//    Json.decodeFromStringStatic(post)
 //    Json.decodeFromString(Json.serializersModule.getContextualOrDefault(), post)
 }

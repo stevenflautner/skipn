@@ -11,4 +11,9 @@ expect open class BrowserElement {
     fun getTop(): Double
     fun setLeft(left: Double)
     fun setTop(top: Double)
+    fun getScrollTop(): Double
+    fun setScrollTop(scrollTop: Double)
+    fun getScrollLeft(): Double
+    fun setScrollLeft(scrollLeft: Double)
+    fun focus()
 }

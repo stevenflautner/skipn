@@ -5,6 +5,7 @@ package io.skipn.actions
 
 import io.skipn.Endpoint
 import io.skipn.SkipnContext
+import io.skipn.builder.BuildContext
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
@@ -28,13 +29,13 @@ expect class LoadTask<RESP : Any>(load: suspend () -> RESP, onSuccess: ((RESP) -
     fun cancel()
 }
 
-inline fun <reified REQ: Any, reified RESP: Any> SkipnContext.load(
+inline fun <reified REQ: Any, reified RESP: Any> BuildContext.load(
         endpoint: Endpoint<REQ, RESP>,
         request: REQ,
         body: LoadBuilder<REQ, RESP>.() -> Unit): LoadTask<RESP> {
 
     val builder = LoadBuilder(endpoint).apply(body)
-    return loader(this, endpointFunc(this, endpoint, request), builder.onSuccess)
+    return loader(skipnContext, endpointFunc(skipnContext, endpoint, request), builder.onSuccess)
 }
 
 class LoadBuilder<REQ: Any, RESP: Any>(private val endpoint: Endpoint<REQ, RESP>) {

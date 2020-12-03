@@ -29,7 +29,7 @@ class FinalizeConsumer<F, T>(val downstream: TagConsumer<F>, val block: (F, Bool
     override fun finalize() = block(downstream.finalize(), level > 0)
 }
 
-public fun <T> TagConsumer<T>.onFinalize(block: (from: T, partial: Boolean) -> Unit): FinalizeConsumer<T, T> =
+public fun <T> TagConsumer<T>.onFinalize(block: (from: T, partial: Boolean) -> Unit): TagConsumer<T> =
     FinalizeConsumer(this) { to, partial -> block(to, partial); to }
 
 public fun <F, T> TagConsumer<F>.onFinalizeMap(block: (from: F, partial: Boolean) -> T): TagConsumer<T> =

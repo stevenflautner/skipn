@@ -1,4 +1,4 @@
-package kotlinx.html.generated
+package kotlinx.html.js
 
 import kotlinx.html.*
 import kotlinx.html.impl.*
@@ -307,12 +307,12 @@ public inline fun TagConsumer<HTMLElement>.hr(classes : String? = null, crossinl
 @Deprecated("This tag doesn't support content or requires unsafe (try unsafe {})")
 @Suppress("DEPRECATION")
 /**
- * Document components.root element
+ * Document root element
  */
 @HtmlTagMarker
 public fun TagConsumer<HTMLElement>.html(content : String = "", namespace : String? = null) : HTMLHtmlElement = HTML(emptyMap, this, namespace).visitAndFinalize(this, {+content}) as HTMLHtmlElement
 /**
- * Document components.root element
+ * Document root element
  */
 @HtmlTagMarker
 public inline fun TagConsumer<HTMLElement>.html(namespace : String? = null, crossinline block : HTML.() -> Unit = {}) : HTMLHtmlElement = HTML(emptyMap, this, namespace).visitAndFinalize(this, block) as HTMLHtmlElement

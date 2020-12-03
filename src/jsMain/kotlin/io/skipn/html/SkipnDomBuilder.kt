@@ -1,18 +1,24 @@
-package kotlinx.html.dom
+package io.skipn.html
 
 import io.skipn.builder.BuildContext
 import io.skipn.builder.Builder
 import kotlinx.html.*
-import kotlinx.html.consumers.*
-import org.w3c.dom.*
-import org.w3c.dom.events.*
+import kotlinx.html.consumers.onFinalize
+import org.w3c.dom.Document
+import org.w3c.dom.HTMLElement
+import org.w3c.dom.Node
+import org.w3c.dom.asList
+import org.w3c.dom.events.Event
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun HTMLElement.setEvent(name: String, noinline callback : (Event) -> Unit) : Unit {
     asDynamic()[name] = callback
 }
 
-class JSDOMBuilder<out R : HTMLElement>(val document : Document, override val rootBuildContext: BuildContext) : TagConsumer<R>, Builder {
+class JSDOMBuilder<out R : HTMLElement>(
+        val document: Document,
+        override val rootBuildContext: BuildContext
+) : TagConsumer<R>, Builder {
     private val path = arrayListOf<HTMLElement>()
     private var lastLeaved : HTMLElement? = null
 
@@ -24,7 +30,6 @@ class JSDOMBuilder<out R : HTMLElement>(val document : Document, override val ro
     }
 
     override fun onTagStart(tag: Tag) {
-
         val element: HTMLElement = when {
             tag.namespace != null -> document.createElementNS(tag.namespace!!, tag.tagName).asDynamic()
             else -> document.createElement(tag.tagName) as HTMLElement
@@ -121,32 +126,31 @@ class JSDOMBuilder<out R : HTMLElement>(val document : Document, override val ro
 
 }
 
-
 fun Document.createTree(context: BuildContext) : TagConsumer<HTMLElement> = JSDOMBuilder(this, context)
 fun Document.create(context: BuildContext) : TagConsumer<HTMLElement> = JSDOMBuilder(this, context)
 
 fun Node.append(context: BuildContext, block: TagConsumer<HTMLElement>.() -> Unit): List<HTMLElement> =
-    ArrayList<HTMLElement>().let { result ->
-        ownerDocumentExt.createTree(context).onFinalize { it, partial ->
-            if (!partial) {
-                result.add(it); appendChild(it)
-            }
-        }.block()
+        ArrayList<HTMLElement>().let { result ->
+            ownerDocumentExt.createTree(context).onFinalize { it, partial ->
+                if (!partial) {
+                    result.add(it); appendChild(it)
+                }
+            }.block()
 
-        result
-    }
+            result
+        }
 
 fun Node.prepend(context: BuildContext, block: TagConsumer<HTMLElement>.() -> Unit): List<HTMLElement> =
-    ArrayList<HTMLElement>().let { result ->
-        ownerDocumentExt.createTree(context).onFinalize { it, partial ->
-            if (!partial) {
-                result.add(it)
-                insertBefore(it, firstChild)
-            }
-        }.block()
+        ArrayList<HTMLElement>().let { result ->
+            ownerDocumentExt.createTree(context).onFinalize { it, partial ->
+                if (!partial) {
+                    result.add(it)
+                    insertBefore(it, firstChild)
+                }
+            }.block()
 
-        result
-    }
+            result
+        }
 
 //val HTMLElement.append: TagConsumer<HTMLElement>
 //    get() = ownerDocumentExt.createTree().onFinalize { element, partial ->

@@ -7,6 +7,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
 import io.skipn.form.FormValidator
+import io.skipn.utils.decodeFromStringStatic
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
@@ -38,8 +39,11 @@ inline fun <reified REQ: Any, RESP: Any> Routing.endpoint(
 //            }
 //            else -> throw Exception("Content type could not be handled by endpoint at ${endpoint.route}")
 //        }
-        val json = call.receive<String>().removeSurrounding("\"")
-        val request = Json.decodeFromString<REQ>(json)
+//        val json = call.receive<String>().removeSurrounding("\"")
+//        println("RECEIUVED JDS : ")
+//        println(json)
+//        val request = Json.decodeFromStringStatic<REQ>(json)
+        val request = call.receive<REQ>()
 
         val response = call.func(request)
         call.respond(response)

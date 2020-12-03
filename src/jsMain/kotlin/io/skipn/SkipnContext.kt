@@ -1,21 +1,15 @@
 package io.skipn
 
+import io.skipn.builder.buildContext
 import io.skipn.platform.DEV
 import io.skipn.platform.SkipnResources
 import io.skipn.utils.byId
+import kotlinx.browser.window
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
-
-actual val FlowContent.skipnContext: SkipnContext
-get() {
-    return Skipn.context
-//    val consumer = consumer
-//    if (consumer is DelayedConsumer)
-//        return (consumer.downstream as HTMLStreamBuilder).elementHandler
-//    return (consumer as JSDOMBuilder).elementHandler
-}
+import kotlin.js.Date
 
 fun FlowContent.getUnderlyingHtmlElement(): HTMLElement {
     var d = this.consumer.asDynamic()
@@ -45,4 +39,25 @@ actual class SkipnContext(route: String) {
     actual val points = Elements()
     actual val resources = SkipnResources()
 
+    inline fun initialize(body: () -> Unit) {
+        val ct = Date().getMilliseconds()
+        body()
+        isInitializing = false
+        if (DEV) {
+            println("Skipn initialized, took ${Date().getMilliseconds() - ct} ms")
+        }
+    }
+
+}
+
+inline fun createSkipnContext(body: (SkipnContext) -> Unit): SkipnContext {
+    val ct = Date().getMilliseconds()
+
+    return SkipnContext(window.location.pathname).apply {
+        body(this)
+        isInitializing = false
+        if (DEV) {
+            println("Skipn initialized, took ${Date().getMilliseconds() - ct} ms")
+        }
+    }
 }

@@ -1,7 +1,5 @@
 package kotlinx.html
 
-import kotlinx.html.*
-import kotlinx.html.impl.*
 import kotlinx.html.attributes.*
 
 /*******************************************************************************

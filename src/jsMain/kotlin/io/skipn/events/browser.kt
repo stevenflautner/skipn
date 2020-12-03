@@ -1,28 +1,17 @@
 package io.skipn.events
 
-import io.ktor.client.*
-import io.ktor.client.request.*
 import io.skipn.*
 import io.skipn.browser.BrowserElement
 import io.skipn.builder.builder
-import io.skipn.form.FormState
-import io.skipn.builder.buildContext
 import io.skipn.form.FormBuilder
-import io.skipn.utils.decodeFromStringStatic
 import kotlinx.browser.document
-import kotlinx.browser.window
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.html.FORM
 import kotlinx.html.FlowContent
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.w3c.dom.GlobalEventHandlers
 import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.MutationObserver
 import org.w3c.dom.MutationObserverInit
 import org.w3c.xhr.FormData
-import org.w3c.fetch.*
 
 actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
     val element = prepareElement()

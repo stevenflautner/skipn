@@ -6,8 +6,8 @@ plugins {
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.91"
-val kversion = "1.4.1"
+version = "0.0.99"
+val kversion = "1.4.2"
 
 repositories {
     mavenCentral()
@@ -58,7 +58,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-server-netty:$kversion")
-                implementation("io.ktor:ktor-html-builder:$kversion")
+//                implementation("io.ktor:ktor-html-builder:$kversion")
                 implementation("io.ktor:ktor-serialization:$kversion")
             }
         }

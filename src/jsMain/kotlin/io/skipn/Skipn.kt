@@ -3,22 +3,15 @@ package io.skipn
 import io.skipn.actions.routePage
 import io.skipn.utils.byId
 import kotlinx.html.*
-import kotlinx.html.stream.createHTML
 import io.skipn.builder.BuildContext
-import io.skipn.html.body
+import io.skipn.html.HtmlApp
+import io.skipn.html.create
+import io.skipn.html.createHTML
+import io.skipn.html.html
 import io.skipn.platform.DEV
-import io.skipn.provide.PinningContext
 import io.skipn.utils.buildApiJson
 import kotlinx.browser.document
 import kotlinx.browser.window
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import kotlinx.html.dom.create
-import kotlinx.serialization.json.Json
-import kotlin.coroutines.CoroutineContext
-import kotlin.js.Date
 
 //fun initSkipn(app: HTML.() -> Unit, onInitialized: () -> Unit) {
 //    window.onload = {
@@ -31,35 +24,49 @@ import kotlin.js.Date
 
 object Skipn {
 
-    val context = SkipnContext(window.location.pathname)
     val apiJson = buildApiJson()
+    lateinit var context: SkipnContext
+    private set
 
-    fun initialize(app: HTML.() -> Unit) {
-        val ct = Date().getMilliseconds()
-        DEV = byId("skipn-main-script").getAttribute("data-dev") == "true"
+    var runAfterInitialized: ArrayList<() -> Unit>? = arrayListOf()
 
-        window.onpopstate = {
-            routePage(window.location.pathname)
-            Unit
-        }
+    fun initialize(app: HtmlApp.() -> Unit) {
+        createSkipnContext { skipnContext ->
+            context = skipnContext
 
-        val rootBuildContext = BuildContext("skipn-root", PinningContext(parent = null))
-        rootBuildContext.coroutineScope = MainScope()
+            DEV = byId("skipn-main-script").getAttribute("data-dev") == "true"
 
-        if (DEV) {
-            document.documentElement!!.replaceWith(document.create(rootBuildContext).html {
-                app()
-            })
-        }
-        else {
-            context.resources.init(byId("skipn-res").getAttribute("data-res")!!)
+            window.onpopstate = {
+                routePage(window.location.pathname)
+                Unit
+            }
 
-            createHTML(context, rootBuildContext).html {
-                app()
+            val rootBuildContext = BuildContext.createRoot(skipnContext)
+
+            if (DEV) {
+                document.documentElement!!.replaceWith(document.create(rootBuildContext).html {
+                    html(app)
+                })
+            }
+            else {
+                skipnContext.resources.init(byId("skipn-res").getAttribute("data-res")!!)
+
+                createHTML(rootBuildContext).html {
+                    html(app)
+                }
             }
         }
-
-        context.isInitializing = false
-        println("Skipn initialized, took ${Date().getMilliseconds() - ct} ms")
+        runAfterInitialized!!.forEach {
+            it()
+        }
+        runAfterInitialized = null
     }
+}
+
+internal fun ensureRunAfterInitialization(body: () -> Unit) {
+    if (Skipn.context.isInitializing) {
+        Skipn.runAfterInitialized!!.add(body)
+        return
+    }
+    body()
 }

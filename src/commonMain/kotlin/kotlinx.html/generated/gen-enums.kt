@@ -56,7 +56,7 @@ object ARel {
     val stylesheet : String = "Stylesheet"
     val subsection : String = "Subsection"
 
-    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "components.index", "next", "prev", "section", "start", "stylesheet", "subsection")
+    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "index", "next", "prev", "section", "start", "stylesheet", "subsection")
 }
 
 @Suppress("unused")
@@ -112,7 +112,7 @@ object AreaRel {
     val stylesheet : String = "Stylesheet"
     val subsection : String = "Subsection"
 
-    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "components.index", "next", "prev", "section", "start", "stylesheet", "subsection")
+    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "index", "next", "prev", "section", "start", "stylesheet", "subsection")
 }
 
 @Suppress("unused")
@@ -295,7 +295,7 @@ object LinkRel {
     val stylesheet : String = "Stylesheet"
     val subsection : String = "Subsection"
 
-    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "components.index", "next", "prev", "section", "start", "stylesheet", "subsection")
+    val values : List<String> = listOf("alternate", "appEndIx", "bookmark", "chapter", "contentS", "copyright", "glossary", "help", "index", "next", "prev", "section", "start", "stylesheet", "subsection")
 }
 
 @Suppress("unused")

@@ -6,21 +6,20 @@ import io.ktor.http.content.*
 import io.ktor.response.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import io.skipn.html.HTMLStreamBuilder
 import io.skipn.SkipnContext
 import io.skipn.builder.BuildContext
-import io.skipn.provide.PinningContext
-import kotlinx.coroutines.coroutineScope
-import kotlinx.html.HTML
+import io.skipn.html.HtmlApp
+import io.skipn.html.html
 import kotlinx.html.consumers.delayed
 import kotlinx.html.html
-import kotlinx.html.stream.HTMLStreamBuilder
 
 /**
  * Represents an [OutgoingContent] using `kotlinx.html` builder.
  */
 class SkipnHtmlContent(
     private val skipnContext: SkipnContext,
-    private val builder: HTML.() -> Unit
+    private val builder: HtmlApp.() -> Unit
 ) : OutgoingContent.WriteChannelContent() {
 
     override val status = HttpStatusCode.OK
@@ -28,32 +27,46 @@ class SkipnHtmlContent(
         get() = ContentType.Text.Html.withCharset(Charsets.UTF_8)
 
     override suspend fun writeTo(channel: ByteWriteChannel) {
-        val rootBuildContext = BuildContext("skipn-root", PinningContext(parent = null))
+        val rootBuildContext = BuildContext.createRoot(skipnContext)
 
-        coroutineScope {
-            rootBuildContext.coroutineScope = this
+        channel.bufferedWriter().use {
+            it.append("<!DOCTYPE html>\n")
 
-            channel.bufferedWriter().use {
-                it.append("<!DOCTYPE html>\n")
-
-                HTMLStreamBuilder(
+            HTMLStreamBuilder(
                     it,
-                    skipnContext,
                     rootBuildContext,
                     prettyPrint = false,
                     xhtmlCompatible = false,
-                ).run {
-                    delayed()
-                }.html(block = builder)
+            ).run {
+                delayed()
+            }.html {
+                html(builder)
             }
         }
+//
+//        coroutineScope {
+//            rootBuildContext.coroutineScope = this
+//
+//            channel.bufferedWriter().use {
+//                it.append("<!DOCTYPE html>\n")
+//
+//                HTMLStreamBuilder(
+//                    it,
+//                    rootBuildContext,
+//                    prettyPrint = false,
+//                    xhtmlCompatible = false,
+//                ).run {
+//                    delayed()
+//                }.html(block = builder)
+//            }
+//        }
     }
 }
 
 /**
  * Responds to a client with a HTML response, using specified [block] to build an HTML page
  */
-suspend fun ApplicationCall.respondSkipnHtml(app: HTML.() -> Unit) {
+suspend fun ApplicationCall.respondSkipnHtml(app: HtmlApp.() -> Unit) {
     respond(SkipnHtmlContent(SkipnContext(parseRoute(), this), app))
 }
 

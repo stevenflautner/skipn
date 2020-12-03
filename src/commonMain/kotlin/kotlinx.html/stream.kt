@@ -1,32 +1,13 @@
 package kotlinx.html.stream
 
-import io.skipn.builder.BuildContext
-import io.skipn.builder.Builder
 import kotlinx.html.*
 import kotlinx.html.consumers.*
-import io.skipn.SkipnContext
 import org.w3c.dom.events.*
 
-class HTMLStreamBuilder<out O : Appendable>(
-    val out: O,
-    val skipnContext: SkipnContext,
-    override val rootBuildContext: BuildContext,
-    val prettyPrint: Boolean,
-    val xhtmlCompatible: Boolean
-) :
-    TagConsumer<O>, Builder {
+class HTMLStreamBuilder<out O : Appendable>(val out: O, val prettyPrint: Boolean, val xhtmlCompatible: Boolean) :
+    TagConsumer<O> {
     private var level = 0
     private var ln = true
-
-//    val skipnContext = SkipnContext()
-
-    override val builderContextTree: ArrayDeque<BuildContext> = ArrayDeque(1)
-    override var currentBuildContext: BuildContext = rootBuildContext
-
-    init {
-//        rootBuildContext.coroutineScope = rootCoroutineScope
-        builderContextTree.addFirst(rootBuildContext)
-    }
 
     override fun onTagStart(tag: Tag) {
         if (prettyPrint && !tag.inlineTag) {
@@ -74,12 +55,6 @@ class HTMLStreamBuilder<out O : Appendable>(
     }
 
     override fun onTagEnd(tag: Tag) {
-        val id = tag.attributes["id"]
-
-        if (id != null) {
-            ascend(id)
-        }
-
         level--
         if (ln) {
             indent()
@@ -159,23 +134,21 @@ class HTMLStreamBuilder<out O : Appendable>(
     }
 }
 
-private const val AVERAGE_PAGE_SIZE = 32768
+private val AVERAGE_PAGE_SIZE = 32768
 
-fun createHTML(skipnContext: SkipnContext, rootBuildContext: BuildContext, prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false): TagConsumer<String> =
+fun createHTML(prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false): TagConsumer<String> =
     HTMLStreamBuilder(
         StringBuilder(AVERAGE_PAGE_SIZE),
-        skipnContext,
-        rootBuildContext,
         prettyPrint,
         xhtmlCompatible
     ).onFinalizeMap { sb, _ -> sb.toString() }.delayed()
 
-//fun <O : Appendable> O.appendHTML(prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false, coroutineScope: CoroutineScope): TagConsumer<O> =
-//    HTMLStreamBuilder(this, prettyPrint, xhtmlCompatible, rootCoroutineScope = coroutineScope).delayed()
+fun <O : Appendable> O.appendHTML(prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false): TagConsumer<O> =
+    HTMLStreamBuilder(this, prettyPrint, xhtmlCompatible).delayed()
 
-//@Deprecated("Should be resolved to the previous implementation", level = DeprecationLevel.HIDDEN)
-//fun <O : Appendable> O.appendHTML(prettyPrint: Boolean = true): TagConsumer<O> =
-//    appendHTML(prettyPrint, false)
+@Deprecated("Should be resolved to the previous implementation", level = DeprecationLevel.HIDDEN)
+fun <O : Appendable> O.appendHTML(prettyPrint: Boolean = true): TagConsumer<O> =
+    appendHTML(prettyPrint, false)
 
 private val escapeMap = mapOf(
     '<' to "&lt;",

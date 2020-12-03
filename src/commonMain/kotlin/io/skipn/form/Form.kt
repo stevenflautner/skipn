@@ -42,14 +42,17 @@ class FormState(val endpoint: FormEndpoint<*, *>) {
 
         companion object {
 
-            inline fun <reified T: Any?> create(input: KProperty<T>): Input<T> {
+            inline fun <reified T: Any?> create(input: KProperty<T>, password: Boolean): Input<T> {
                 val required = null !is T
                 val error = MutableStateFlow<String?>(null)
+
+                val type = if (password) InputType.password
+                else convertType<T>()
 
                 return Input(
                     input.name,
                     required,
-                    convertType<T>(),
+                    type,
                     MutableStateFlow(null),
                     error,
                 )
@@ -144,8 +147,9 @@ class FormBuilder(val elem: FORM, val state: FormState) {
     inline fun <reified T: Any?> KProperty<T>.Input(
         label: String,
         placeholder: String,
+        password: Boolean = false
     ) {
-        val input = FormState.Input.create(this).also {
+        val input = FormState.Input.create(this, password).also {
             state.addInput(it)
         }
 

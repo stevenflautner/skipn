@@ -1,34 +1,51 @@
 package io.skipn.browser
 
+import io.skipn.errors.BrowserOnlyFunction
+
 actual open class BrowserElement {
     actual fun setClasses(classes: String) {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun setWidth(width: Double) {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun setHeight(height: Double) {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun getWidth(): Double {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun getHeight(): Double {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun getAttribute(name: String): String? {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun getLeft(): Double {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun getTop(): Double {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun setLeft(left: Double) {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
     }
     actual fun setTop(top: Double) {
-        TODO("Browser only Function Should not be invoked on the server")
+        throw BrowserOnlyFunction
+    }
+    actual fun getScrollTop(): Double {
+        throw BrowserOnlyFunction
+    }
+    actual fun setScrollTop(scrollTop: Double) {
+      throw BrowserOnlyFunction
+    }
+    actual fun getScrollLeft(): Double {
+      throw BrowserOnlyFunction
+    }
+    actual fun setScrollLeft(scrollLeft: Double) {
+      throw BrowserOnlyFunction
+    }
+    actual fun focus() {
+        throw BrowserOnlyFunction
     }
 }

@@ -4,20 +4,17 @@ import io.ktor.application.*
 import io.skipn.platform.SkipnResources
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
-import kotlinx.html.consumers.DelayedConsumer
-import kotlinx.html.consumers.FinalizeConsumer
-import kotlinx.html.stream.HTMLStreamBuilder
 
-actual val FlowContent.skipnContext: SkipnContext
-get() {
-    var consumer = consumer
-    if (consumer is DelayedConsumer) {
-        consumer = consumer.downstream
-        if (consumer is FinalizeConsumer<*, *>)
-            consumer = consumer.downstream
-    }
-    return (consumer as HTMLStreamBuilder).skipnContext
-}
+//actual val FlowContent.skipnContext: SkipnContext
+//get() {
+//    var consumer = consumer
+//    if (consumer is DelayedConsumer) {
+//        consumer = consumer.downstream
+//        if (consumer is FinalizeConsumer<*, *>)
+//            consumer = consumer.downstream
+//    }
+//    return (consumer as HTMLStreamBuilder).skipnContext
+//}
 
 fun FlowContent.prepareElement(): String {
     val context = skipnContext

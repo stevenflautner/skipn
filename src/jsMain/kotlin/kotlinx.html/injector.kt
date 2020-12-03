@@ -1,7 +1,6 @@
-package kotlinx.html
+package kotlinx.html.injector
 
 import kotlinx.html.*
-import kotlinx.html.dom.*
 import org.w3c.dom.*
 import kotlin.reflect.*
 
