@@ -78,7 +78,4 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
 
         body = request
     }
-
-//    Json.decodeFromStringStatic(post)
-//    Json.decodeFromString(Json.serializersModule.getContextualOrDefault(), post)
 }

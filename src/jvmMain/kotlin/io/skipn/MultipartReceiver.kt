@@ -67,6 +67,12 @@ suspend inline fun <reified T: Any> ApplicationCall.parseMultipart(): Map<String
                     String::class.starProjectedType.withNullability(true) -> {
                         data[name] = parseEmpty(part.value)
                     }
+                    Boolean::class.starProjectedType -> {
+                        data[name] = refuseEmpty(part.value).toBoolean()
+                    }
+                    Boolean::class.starProjectedType.withNullability(true) -> {
+                        data[name] = parseEmpty(part.value)?.toBoolean()
+                    }
                     else -> {
                         if (param.type.isSubtypeOf(List::class.starProjectedType)
                             || param.type.isSubtypeOf(List::class.starProjectedType.withNullability(true))) {

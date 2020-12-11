@@ -13,7 +13,7 @@ expect fun FlowContent.onClick(ignoreChildren: Boolean = false, onClick: (() -> 
 expect fun FlowContent.onHover(onHover: (Boolean) -> Unit)
 expect inline fun <reified RESP: Any> FORM.attachSubmitHandler(
         endpoint: FormEndpoint<*, RESP>,
-        builder: FormBuilder,
+        builder: FormBuilder<RESP>,
         crossinline onSuccess: (RESP) -> Unit
 ) : () -> Unit
 expect fun FlowContent.onInput(onInput: (String, BrowserElement) -> Unit)

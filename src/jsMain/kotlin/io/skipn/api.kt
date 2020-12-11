@@ -1,12 +1,15 @@
 package io.skipn
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.skipn.Skipn.apiJson
+import io.skipn.errors.ApiError
 import io.skipn.utils.decodeFromStringStatic
 import kotlinx.browser.window
 import org.w3c.dom.HTMLFormElement
@@ -16,6 +19,31 @@ import org.w3c.xhr.FormData
 val api = HttpClient {
     install(JsonFeature) {
         serializer = KotlinxSerializer()
+    }
+    HttpResponseValidator {
+        validateResponse { response: HttpResponse ->
+            if (response.status.value != 200)
+                throw ClientRequestException(response)
+
+        }
+
+        handleResponseException { cause: Throwable ->
+//            throw Skipn.errorSerializer(cause.resp)
+//            println("ERORORRRR?")
+//            println(cause is ClientRequestException)
+
+
+            when(cause) {
+                is ClientRequestException -> {
+//                    println(cause.response.content.readUTF8Line(5000)!!)
+
+                    throw ApiError(cause.response.content.readUTF8Line(5000)!!)
+//                    throw Skipn.errorSerializer(cause.response.content.readUTF8Line(5000)!!)
+                }
+//                is ClientRequestException -> println("CLIENT REQUEST EXCE")
+//                else -> throw Exception("WOLLALA")
+            }
+        }
     }
     defaultRequest {
 //        contentType(ContentType.Application.Json)
@@ -40,28 +68,28 @@ val multipartApi by lazy {
 // TODO Migrate this to using api instead of window.fetch
 //  when post data can be converted from the dom or Form implementation
 //  is updated so that it doesn't rely on the dom for getting input values
-inline fun <reified RESP: Any> postFormLegacyApi(
-    endpoint: FormEndpoint<*, RESP>,
-    form: HTMLFormElement,
-    crossinline onSuccess: (RESP) -> Unit
-) {
-    window.fetch(endpoint.route, init = RequestInit(
-        method = "post",
-        body = FormData(form),
-//        headers = json().apply {
-//            // Required so that if we get a 'Set-Cookie' header in the
-//            // response it is applied to the browser
-//            this["credentials"] = "same-origin"
+//inline fun <reified RESP: Any> postFormLegacyApi(
+//    endpoint: FormEndpoint<*, RESP>,
+//    form: HTMLFormElement,
+//    crossinline onSuccess: (RESP) -> Unit
+//) {
+//    window.fetch(endpoint.route, init = RequestInit(
+//        method = "post",
+//        body = FormData(form),
+////        headers = json().apply {
+////            // Required so that if we get a 'Set-Cookie' header in the
+////            // response it is applied to the browser
+////            this["credentials"] = "same-origin"
+////        }
+//    )).then { response ->
+//        if (response.status == 200.toShort()) {
+//            response.json()
+//        } else {
+//            println("there was an error...${response.status}")
 //        }
-    )).then { response ->
-        if (response.status == 200.toShort()) {
-            response.json()
-        } else {
-            println("there was an error...${response.status}")
-        }
-    }.then { json: dynamic ->
-        val jsonString = JSON.stringify(json)
-        val data = apiJson.decodeFromStringStatic<RESP>(jsonString)
-        onSuccess(data)
-    }
-}
+//    }.then { json: dynamic ->
+//        val jsonString = JSON.stringify(json)
+//        val data = apiJson.decodeFromStringStatic<RESP>(jsonString)
+//        onSuccess(data)
+//    }
+//}

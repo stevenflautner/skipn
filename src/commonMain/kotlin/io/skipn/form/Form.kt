@@ -4,91 +4,103 @@ import io.skipn.FileData
 import io.skipn.FormEndpoint
 import io.skipn.builder.launch
 import io.skipn.events.*
+import io.skipn.form.InputField.Companion.convertType
+import io.skipn.observers.attributeOf
 import io.skipn.observers.classesOf
 import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
-import io.skipn.utils.buildApiJson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import kotlinx.html.*
 import kotlin.reflect.KProperty
 
-expect suspend inline fun <reified RESP: Any> postForm(state: FormState): RESP
+expect suspend inline fun <reified RESP: Any> postForm(state: FormState<RESP>): RESP
 
-class FormState(val endpoint: FormEndpoint<*, *>) {
+sealed class FormField<T: Any?>
 
-    val inputs = hashMapOf<String, Input<*>>()
+class ValueField<T: Any?>(
+        val value: T
+) : FormField<T>() {
+    override fun toString(): String {
+        return value.toString()
+    }
+}
 
-    fun addInput(input: Input<*>) {
+class InputField<T: Any?>(
+        val name: String,
+        var required: Boolean,
+        val valueAttr: MutableStateFlow<T?>,
+        val error: MutableStateFlow<String?>,
+) : FormField<T>() {
+
+    var touched = false
+        private set
+
+    fun touch() {
+        if (touched) return
+        touched = true
+    }
+
+    companion object {
+
+        inline fun <reified T: Any?> create(property: KProperty<T>): InputField<T> {
+            val required = null !is T
+
+            return InputField(
+                    property.name,
+                    required,
+                    MutableStateFlow(null),
+                    MutableStateFlow(null),
+            )
+        }
+
+        inline fun <reified T> convertType(): InputType {
+            return when(T::class) {
+                Int::class -> InputType.number
+                Float::class -> InputType.number
+                Double::class -> InputType.number
+                LocalDateTime::class -> InputType.dateTimeLocal
+                FileData::class -> InputType.file
+                Boolean::class -> InputType.checkBox
+                else -> InputType.text
+            }
+        }
+
+        inline fun <reified T: Any?> convertValue(valueString: String): T? {
+            if (valueString == "") return null
+
+            return when(T::class) {
+                Int::class -> valueString.toInt() as T
+                Float::class -> valueString.toFloat() as T
+                Double::class -> valueString.toDouble() as T
+                LocalDateTime::class -> LocalDateTime.parse(valueString) as T
+                Boolean::class -> (valueString == "true") as T
+//                FileData::class -> FileData()
+                else -> valueString as T
+            }
+        }
+    }
+}
+
+class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
+
+    val inputs = hashMapOf<String, FormField<*>>()
+    val _error = MutableStateFlow<String?>(null)
+
+    fun addInput(input: InputField<*>) {
         inputs[input.name] = input
     }
 
-    class Input<T: Any?>(
-        val name: String,
-        val required: Boolean,
-        val type: InputType,
-        val valueAttr: MutableStateFlow<T?>,
-        val error: MutableStateFlow<String?>,
-    ) {
-
-        var touched = false
-        private set
-
-        fun touch() {
-            if (touched) return
-            touched = true
-        }
-
-        companion object {
-
-            inline fun <reified T: Any?> create(input: KProperty<T>, password: Boolean): Input<T> {
-                val required = null !is T
-                val error = MutableStateFlow<String?>(null)
-
-                val type = if (password) InputType.password
-                else convertType<T>()
-
-                return Input(
-                    input.name,
-                    required,
-                    type,
-                    MutableStateFlow(null),
-                    error,
-                )
-            }
-
-            inline fun <reified T> convertType(): InputType {
-                return when(T::class) {
-                    Int::class -> InputType.number
-                    Float::class -> InputType.number
-                    Double::class -> InputType.number
-                    LocalDateTime::class -> InputType.dateTimeLocal
-                    FileData::class -> InputType.file
-                    else -> InputType.text
-                }
-            }
-
-            inline fun <reified T: Any?> convertValue(valueString: String): T? {
-                if (valueString == "") return null
-
-                return when(T::class) {
-                    Int::class -> valueString.toInt() as T
-                    Float::class -> valueString.toFloat() as T
-                    Double::class -> valueString.toDouble() as T
-                    LocalDateTime::class -> LocalDateTime.parse(valueString) as T
-//                FileData::class -> FileData()
-                    else -> valueString as T
-                }
-            }
-        }
+    fun <T: Any?> addValue(property: KProperty<T>, value: T) {
+        inputs[property.name] = ValueField(value)
     }
 
     fun validateTouched() {
         val custom = validateCustom()
 
-        inputs.filter { it.value.touched }.forEach {
-            val input = it.value
+        inputs.filter { (it.value as? InputField<*>)?.touched ?: false }.forEach {
+            val input = it.value as InputField<*>
 
             if (input.required && input.valueAttr.value == null) {
                 input.error.value = "Kötelező megadni"
@@ -105,13 +117,13 @@ class FormState(val endpoint: FormEndpoint<*, *>) {
 
         val custom = validateCustom()
 
-        inputs.forEach {
-            val input = it.value
+        inputs.filter { it.value is InputField<*> }.forEach {
+            val input = it.value as InputField<*>
 
             input.touch()
 
             if (input.required && input.valueAttr.value == null) {
-                input.error.value = "Kötelező megadni!"
+                input.error.value = "Kötelező megadni"
                 if (valid) valid = false
             }
             else {
@@ -129,8 +141,8 @@ class FormState(val endpoint: FormEndpoint<*, *>) {
         val validator = endpoint.validator ?: return null
 
         // Create snapshot of every input value
-        val snapshot = inputs.mapValues {
-            it.value.valueAttr.value
+        val snapshot = inputs.filterValues { it is InputField<*> }.mapValues {
+            (it.value as InputField<*>).valueAttr.value
         }
 
         // Perform custom logic against form snapshot
@@ -140,22 +152,66 @@ class FormState(val endpoint: FormEndpoint<*, *>) {
 
         return customValidator.validationError
     }
+
+    inline fun <reified T: Any?> findOrCreate(property: KProperty<T>, default: T?): InputField<T> {
+        return getInput(property) ?: InputField.create(property).also {
+            it.valueAttr.value = default
+            addInput(it)
+        }
+    }
+
+    inline fun <reified T: Any?> getInput(property: KProperty<T>) = inputs[property.name] as? InputField<T>
+
+    operator fun plus(formState: FormState<RESP>): FormState<RESP> {
+        return FormState(endpoint).also {
+            it.inputs.putAll(inputs)
+            it.inputs.putAll(formState.inputs)
+        }
+    }
+
+    fun resetError() {
+        _error.value = null
+    }
+
+    fun error(id: String) {
+        _error.value = id
+    }
+
+    fun touch(input: InputField<*>) {
+        input.touch()
+        resetError()
+    }
 }
 
-class FormBuilder(val elem: FORM, val state: FormState) {
+class FormBuilder<RESP: Any>(val elem: FORM, val state: FormState<RESP>) {
 
     inline fun <reified T: Any?> KProperty<T>.Input(
         label: String,
         placeholder: String,
-        password: Boolean = false
-    ) {
-        val input = FormState.Input.create(this, password).also {
-            state.addInput(it)
-        }
+        type: InputType? = null,
+        default: T? = null,
+        list: String? = null
+    ): InputField<T> {
+        val input = state.findOrCreate(this, default)
 
         with(elem) {
-            InputComp(input, label, placeholder, "w-full")
+            InputComp(input, label, placeholder, list, type ?: convertType<T>(), "w-full")
         }
+
+        return input
+    }
+
+    fun KProperty<Boolean>.CheckBox(
+        text: String,
+        default: Boolean = false
+    ): InputField<Boolean> {
+        val input = state.findOrCreate(this, default)
+
+        with(elem) {
+            CheckBoxComp(input, text)
+        }
+
+        return input
     }
 
     fun FlowContent.Submit(text: String) {
@@ -172,7 +228,7 @@ class FormBuilder(val elem: FORM, val state: FormState) {
     suspend fun submitDefault() {
         if (!state.validateAll()) return
 
-        postForm<Any>(state)
+        postForm(state as FormState<Any>)
     }
 }
 
@@ -220,41 +276,52 @@ class InputValidator(val inputs: Map<String, Any?>) {
 
 inline fun <reified RESP: Any> FlowContent.Form(
         endpoint: FormEndpoint<*, RESP>,
-        crossinline body: FormBuilder.() -> Unit,
-        crossinline onSuccess: (RESP) -> Unit
+        crossinline body: FormBuilder<RESP>.() -> Unit,
+) = Form(FormState(endpoint), body)
+
+inline fun <reified RESP: Any> FlowContent.Form(
+        state: FormState<RESP>,
+        crossinline body: FormBuilder<RESP>.() -> Unit,
 ) {
     form(classes = "w-full mx-auto", method = FormMethod.post, encType = FormEncType.multipartFormData) {
         preventDefaultSubmit()
 
-        val state = pin(FormState(endpoint))
-        val builder = FormBuilder(this, state)
+        pin(state)
 
-//        val handler = attachSubmitHandler(endpoint, builder, onSuccess)
-//        builder.submitHandler = handler
-
-
-
-        builder.apply {
+        FormBuilder(this, state).apply {
             body()
+        }
+
+        divOf(state._error) { msg ->
+            if (msg == null) return@divOf
+            p("text-red-500 text-sm italic pt-2") {
+                +msg
+            }
         }
     }
 }
 
 inline fun <reified T: Any?> FlowContent.InputComp(
-    input: FormState.Input<T>,
+    input: InputField<T>,
     label: String,
     placeholder: String,
+    list: String? = null,
+    type: InputType,
     wrapperClasses: String
 ) {
-    val state: FormState = locate()
+    val state: FormState<*> = locate()
 
     div("w-full px-3 mb-6 $wrapperClasses") {
         label("block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") {
             htmlFor = label
             +label
         }
-        input(name = input.name, type = input.type) {
+        input(name = input.name, type = type) {
             this.placeholder = placeholder
+
+            list?.let {
+                this.list = it
+            }
 
             classesOf(input.error) { error ->
                 +"appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
@@ -264,13 +331,16 @@ inline fun <reified T: Any?> FlowContent.InputComp(
                     +"border-gray-400"
             }
 
-            onMounted { elem ->
-                input.valueAttr.value = FormState.Input.convertValue(elem.getAttribute("value") ?: "")
+            attributeOf("value", input.valueAttr) { value ->
+                value?.toString() ?: ""
             }
+//            onMounted { elem ->
+//                input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
+//            }
             onInput { _, elem ->
-                input.touch()
+                state.touch(input)
 
-                input.valueAttr.value = FormState.Input.convertValue(elem.getAttribute("value") ?: "")
+                input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
                 state.validateTouched()
             }
         }
@@ -279,6 +349,43 @@ inline fun <reified T: Any?> FlowContent.InputComp(
             p("text-red-500 text-xs italic") {
                 +msg
             }
+        }
+    }
+}
+
+fun FlowContent.CheckBoxComp(
+    input: InputField<Boolean>,
+    text: String,
+) {
+    val state: FormState<*> = locate()
+
+    div("flex items-start") {
+        onClick {
+            input.touch()
+            input.valueAttr.value = input.valueAttr.value?.not()
+            state.validateTouched()
+        }
+
+        div("flex items-center h-5") {
+            input(classes = "focus:ring-green-500 h-5 w-5 text-green-500 border-gray-300 rounded") {
+                name = input.name
+                type = InputType.checkBox
+
+                attributeOf("checked", input.valueAttr) { value ->
+                    value.toString()
+                }
+            }
+        }
+        div("ml-3 text-sm") {
+            span("form-input") {
+                +text
+            }
+        }
+    }
+    divOf(input.error) { msg ->
+        if (msg == null) return@divOf
+        p("text-red-500 text-xs italic") {
+            +msg
         }
     }
 }

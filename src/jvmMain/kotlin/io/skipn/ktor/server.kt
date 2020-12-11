@@ -4,22 +4,45 @@ import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import io.skipn.ErrorFilter
+import io.skipn.errors.ApiError
 import io.skipn.html.HtmlApp
 import io.skipn.utils.buildApiJson
 import java.util.concurrent.TimeUnit
 
 fun Application.Skipn(
         app: HtmlApp.() -> Unit,
-        endpoints: Routing.() -> Unit
+        endpoints: Routing.() -> Unit,
+        errorFilter: ErrorFilter? = null
 ) {
     install(ContentNegotiation) {
         json(buildApiJson())
+//        json()
 
         install(StatusPages) {
             exception<Exception> { cause ->
                 cause.printStackTrace()
+
+//                errorFilter?.let {
+//
+//                    it(cause, call)
+//
+////                    if (it(cause)) {
+////                        call.respond(HttpStatusCode.BadRequest, cause)
+////                    }
+//                }
+
+                if (cause is ApiError) {
+                    val msg = cause.msg
+
+                    if (msg == null)
+                        call.respond(HttpStatusCode.BadRequest)
+                    else
+                        call.respond(HttpStatusCode.BadRequest, msg)
+                }
             }
         }
     }

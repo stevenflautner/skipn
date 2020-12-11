@@ -1,5 +1,7 @@
 package io.skipn
 
+import io.ktor.client.call.*
+import io.ktor.client.statement.*
 import io.skipn.actions.routePage
 import io.skipn.utils.byId
 import kotlinx.html.*
@@ -12,6 +14,8 @@ import io.skipn.platform.DEV
 import io.skipn.utils.buildApiJson
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 //fun initSkipn(app: HTML.() -> Unit, onInitialized: () -> Unit) {
 //    window.onload = {
@@ -22,6 +26,8 @@ import kotlinx.browser.window
 //    }
 //}
 
+typealias ErrorSerializer<T> = suspend (String) -> Exception
+
 object Skipn {
 
     val apiJson = buildApiJson()
@@ -29,6 +35,20 @@ object Skipn {
     private set
 
     var runAfterInitialized: ArrayList<() -> Unit>? = arrayListOf()
+
+    lateinit var errorSerializer: ErrorSerializer<Exception>
+
+    inline fun <reified T: Exception> errorSerializer() {
+        errorSerializer = {
+            println(it)
+            val a =Json.decodeFromString<T>(it)
+            println("ERRRRRRR")
+            println(T::class)
+            println(a)
+            a
+//            it.receive<T>()
+        }
+    }
 
     fun initialize(app: HtmlApp.() -> Unit) {
         createSkipnContext { skipnContext ->

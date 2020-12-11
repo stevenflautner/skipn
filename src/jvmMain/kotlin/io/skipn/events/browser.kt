@@ -29,7 +29,7 @@ actual fun FORM.preventDefaultSubmit() {
 
 actual inline fun <reified RESP: Any> FORM.attachSubmitHandler(
         endpoint: FormEndpoint<*, RESP>,
-        builder: FormBuilder,
+        builder: FormBuilder<RESP>,
         crossinline onSuccess: (RESP) -> Unit
 ) : () -> Unit {
     prepareElement()

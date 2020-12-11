@@ -19,6 +19,7 @@ actual fun <T> FlowContent.attributeOf(
     flow: Flow<T>,
     value: () -> String
 ) {
+    // TOOD SET CHECKED STATE SO THAT PRERENDERS WITH A DEFAULT STATE
     prepareElement()
     attributes[name] = value()
 }

@@ -5,8 +5,24 @@ import io.skipn.builder.launch
 import io.skipn.prepareElement
 import kotlinx.coroutines.flow.*
 import kotlinx.html.FlowContent
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
+
+private fun updateElement(element: Element, name: String, value: String) {
+    when (element) {
+        is HTMLInputElement -> {
+            when(name) {
+                "value" -> element.value = value
+                "checked" -> {
+                    element.checked = value == "true"
+                }
+                else -> element.setAttribute(name, value)
+            }
+        }
+        else -> element.setAttribute(name, value)
+    }
+}
 
 actual fun <T> FlowContent.attributeOf(
     name: String,
@@ -15,22 +31,12 @@ actual fun <T> FlowContent.attributeOf(
 ) {
     val element = prepareElement()
 
-//    element.setAttribute(name, value(stateFlow.value))
-
-    if (name == "value" && element is HTMLInputElement)
-        element.value = value(stateFlow.value)
-    else
-        element.setAttribute(name, value(stateFlow.value))
+    updateElement(element, name, value(stateFlow.value))
 
     launch {
         stateFlow.collect {
-//            element.setAttribute(name, value(it))
-
             // TODO CHANGE THIS TO VALUEOF
-            if (name == "value" && element is HTMLInputElement)
-                element.value = value(it)
-            else
-                element.setAttribute(name, value(it))
+            updateElement(element, name, value(stateFlow.value))
         }
     }
 }
@@ -43,18 +49,12 @@ actual fun <T> FlowContent.attributeOf(
     val element = prepareElement()
 
     // TODO CHANGE THIS TO VALUEOF
-    if (name == "value" && element is HTMLInputElement)
-        element.value = value()
-    else
-        element.setAttribute(name, value())
+    updateElement(element, name, value())
+
 
     launch {
         flow.collect {
-            if (name == "value" && element is HTMLInputElement)
-                element.value = value()
-            else
-                element.setAttribute(name, value())
-//            element.setAttribute(name, value())
+            updateElement(element, name, value())
         }
     }
 }
