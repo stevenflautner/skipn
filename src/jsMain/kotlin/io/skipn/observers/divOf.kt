@@ -76,7 +76,7 @@ actual fun FlowContent.divOf(
     }
 }
 
-private fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
+fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
     val newElement = document.create(context).div {
         id = element.id
 

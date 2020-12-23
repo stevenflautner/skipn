@@ -1,3 +1,4 @@
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -31,18 +32,19 @@ fun main() = runBlocking {
 
 //    while (true) {}
 
-    Navbar(this)
+    val b = URLBuilder("")
 
-}
 
-fun Navbar(ctx: CoroutineScope) {
-        println("111")
-    ctx.launch {
-        asd()
-    }
-        println("33")
-}
-suspend fun asd() {
-    delay(100)
-    println("BLOCKK")
+//    val a = "shopId=1222".parseUrlEncodedParameters()
+//    val r = parseQueryString("localhost:8080/shop?shopId=1222")
+//    println(r.get("shopId"))
+//    println(r.getAll("shopId"))
+//    r.forEach { s, list ->
+//        println("HA")
+//        println(s)
+//        println(list)
+//    }
+//    println(a)
+    println(b.parameters["shopId"])
+
 }

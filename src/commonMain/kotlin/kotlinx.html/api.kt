@@ -2,16 +2,19 @@ package kotlinx.html
 
 import org.w3c.dom.events.*
 
-interface TagConsumer<out R> {
+interface TagConsumerBase {
+    fun onTagEnd(tag: Tag)
     fun onTagStart(tag: Tag)
     fun onTagAttributeChange(tag: Tag, attribute: String, value: String?)
     fun onTagEvent(tag: Tag, event: String, value: (Event) -> Unit)
-    fun onTagEnd(tag: Tag)
     fun onTagContent(content: CharSequence)
     fun onTagContentEntity(entity: Entities)
     fun onTagContentUnsafe(block: Unsafe.() -> Unit)
     fun onTagComment(content: CharSequence)
     fun onTagError(tag: Tag, exception: Throwable): Unit = throw exception
+}
+
+interface TagConsumer<out R> : TagConsumerBase {
     fun finalize(): R
 }
 

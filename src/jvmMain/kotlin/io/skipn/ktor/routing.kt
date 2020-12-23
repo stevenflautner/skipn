@@ -13,26 +13,33 @@ fun Routing.skipnRouting(app: HtmlApp.() -> Unit, endpoints: Routing.() -> Unit)
         val start = System.currentTimeMillis()
         kotlin.runCatching {
             call.respondSkipnHtml(app)
-
         }.onFailure {
-            println("ERRRORR11")
             it.printStackTrace()
         }
         println("Measured: ${System.currentTimeMillis() - start}ms")
     }
 
-    get("/") {
+    static("public") {
+        resources("public")
+    }
+
+    get("{...}") {
         serveApp()
     }
-    get("/{ROUTE}") {
-        serveApp()
-    }
+//    get("/{ROUTE}") {
+//        serveApp()
+//    }
+//    get("/{ROUTE}/{R1}") {
+//        println("THIS CALLEDD??")
+//        serveApp()
+//    }
+//    get("/{ROUTE}") {
+//        serveApp()
+//    }
 
 //    get("/favicon.ico") {
 //        println("SHOULD RETURN FAVICON")
 //    }
 
-    static("public") {
-        resources("public")
-    }
+
 }

@@ -3,24 +3,17 @@
 
 package io.skipn.builder
 
-import io.skipn.SkipnContext
-import io.skipn.provide.PinningContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
-expect class BuildContext constructor(id: String, skipnContext: SkipnContext, pinningContext: PinningContext) : BuildContextBase {
+expect class BuildContext : BuildContextBase {
 
     fun launch(block: suspend CoroutineScope.() -> Unit)
 
-    companion object {
-        fun create(id: String, parent: BuildContext): BuildContext
-        fun createRoot(skipnContext: SkipnContext): BuildContext
-    }
+    fun getRouteLevel(): Int
+
 }
 
 val FlowContent.buildContext: BuildContext

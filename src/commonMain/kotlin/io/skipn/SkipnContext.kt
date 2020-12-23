@@ -3,6 +3,7 @@
 
 package io.skipn
 
+import io.skipn.builder.Router
 import io.skipn.builder.buildContext
 import io.skipn.platform.SkipnResources
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,13 +13,16 @@ import kotlin.jvm.JvmName
 
 class Route(val route: String, val oldRoute: String? = null)
 
-expect class SkipnContext {
+expect class SkipnContext: SkipnContextBase {
 
     var isInitializing: Boolean
-    var route: MutableStateFlow<Route>
     val points: Elements
     val resources: SkipnResources
 
+}
+
+abstract class SkipnContextBase(route: String) {
+    val router = Router(route)
 }
 
 class Elements {

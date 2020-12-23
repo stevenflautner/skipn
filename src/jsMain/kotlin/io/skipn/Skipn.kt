@@ -6,10 +6,7 @@ import io.skipn.actions.routePage
 import io.skipn.utils.byId
 import kotlinx.html.*
 import io.skipn.builder.BuildContext
-import io.skipn.html.HtmlApp
-import io.skipn.html.create
-import io.skipn.html.createHTML
-import io.skipn.html.html
+import io.skipn.html.*
 import io.skipn.platform.DEV
 import io.skipn.utils.buildApiJson
 import kotlinx.browser.document
@@ -58,7 +55,6 @@ object Skipn {
 
             window.onpopstate = {
                 routePage(window.location.pathname)
-                Unit
             }
 
             val rootBuildContext = BuildContext.createRoot(skipnContext)

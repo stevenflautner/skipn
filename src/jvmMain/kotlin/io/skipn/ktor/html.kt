@@ -3,6 +3,7 @@ package io.skipn.ktor
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
@@ -67,9 +68,14 @@ class SkipnHtmlContent(
  * Responds to a client with a HTML response, using specified [block] to build an HTML page
  */
 suspend fun ApplicationCall.respondSkipnHtml(app: HtmlApp.() -> Unit) {
-    respond(SkipnHtmlContent(SkipnContext(parseRoute(), this), app))
+    respond(SkipnHtmlContent(SkipnContext(request.uri, this), app))
 }
 
-fun ApplicationCall.parseRoute(): String {
-    return parameters["ROUTE"]?.let { "/$it" } ?: "/"
-}
+//fun ApplicationCall.parseRoute(): String {
+//    println("URI")
+//    println(request.uri)
+//    return request.uri.removeSuffix("/")
+////    val url = parameters.getAll("ROUTE")?.fold("") { acc, v -> "$acc/$v" }
+////
+////    return parameters["ROUTE"]?.let { "/$it" } ?: "/"
+//}

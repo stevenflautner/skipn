@@ -7,10 +7,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.html.FlowContent
 
-actual class BuildContext actual constructor(
+actual class BuildContext(
         id: String,
         skipnContext: SkipnContext,
-        pinningContext: PinningContext
+        pinningContext: PinningContext,
+        private val routeLevel: Int,
 ) : BuildContextBase(id, skipnContext, pinningContext) {
 
     lateinit var coroutineScope: CoroutineScope
@@ -37,26 +38,30 @@ actual class BuildContext actual constructor(
         coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
     }
 
-    actual companion object {
-        actual fun create(id: String, parent: BuildContext): BuildContext {
+    companion object {
+        fun create(id: String, parent: BuildContext, routeLevel: Int): BuildContext {
             return BuildContext(
                     id,
                     parent.skipnContext,
-                    PinningContext(parent = parent.pinningContext)
+                    PinningContext(parent = parent.pinningContext),
+                    routeLevel
             ).apply {
                 coroutineScope = CoroutineScope(SupervisorJob(parent.coroutineScope.coroutineContext.job))
             }
         }
-        actual fun createRoot(skipnContext: SkipnContext): BuildContext {
+        fun createRoot(skipnContext: SkipnContext): BuildContext {
             return BuildContext(
                     "skipn-root",
                     skipnContext,
-                    PinningContext(parent = null)
+                    PinningContext(parent = null),
+                    0
             ).apply {
                 coroutineScope = CoroutineScope(SupervisorJob())
             }
         }
     }
+
+    actual fun getRouteLevel() = routeLevel
 }
 
 //actual fun <T, FLOW : Flow<T>, RES> FlowContent.stateIn(

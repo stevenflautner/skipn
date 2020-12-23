@@ -32,10 +32,9 @@ fun FlowContent.prepareElement(): Element {
     else getUnderlyingHtmlElement()
 }
 
-actual class SkipnContext(route: String) {
+actual class SkipnContext(route: String) : SkipnContextBase(route) {
 
     actual var isInitializing = true
-    actual var route = MutableStateFlow(Route(route))
     actual val points = Elements()
     actual val resources = SkipnResources()
 
@@ -53,7 +52,7 @@ actual class SkipnContext(route: String) {
 inline fun createSkipnContext(body: (SkipnContext) -> Unit): SkipnContext {
     val ct = Date().getMilliseconds()
 
-    return SkipnContext(window.location.pathname).apply {
+    return SkipnContext(window.location.href).apply {
         body(this)
         isInitializing = false
         if (DEV) {

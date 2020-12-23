@@ -26,10 +26,9 @@ fun FlowContent.prepareElement(): String {
     return id
 }
 
-actual class SkipnContext(route: String, val applicationCall: ApplicationCall) {
+actual class SkipnContext(route: String, val applicationCall: ApplicationCall) : SkipnContextBase(route) {
 
     actual var isInitializing = true
-    actual var route = MutableStateFlow(Route(route))
     actual val points = Elements()
     actual val resources = SkipnResources()
 

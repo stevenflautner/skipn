@@ -25,5 +25,5 @@ actual fun HEAD.skipnHead() {
     meta { charset = "utf-8" }
     meta { attributes["http-equiv"] = "Cache-control"; content = "public" }
     meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
-    link { rel = "stylesheet"; type="text/css"; href = "public/${Skipn.buildHash}.css" }
+    link { rel = "stylesheet"; type="text/css"; href = "/public/${Skipn.buildHash}.css" }
 }

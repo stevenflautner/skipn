@@ -16,3 +16,23 @@ actual val FlowContent.builder: Builder
         return consumer as HTMLStreamBuilder
 //        throw Exception("JSDomBuilder could not be found while building")
     }
+
+actual interface Builder {
+
+    actual val rootBuildContext: BuildContext
+    actual var currentBuildContext: BuildContext
+
+    val routerTree: ArrayDeque<String>
+
+    fun descendRoute(id: String) {
+        rootBuildContext.routeLevel++
+        routerTree.addLast(id)
+    }
+
+    fun ascendRoute(id: String?) {
+        if (id == null || routerTree.lastOrNull() != id) return
+        rootBuildContext.routeLevel--
+        routerTree.removeLast()
+    }
+
+}

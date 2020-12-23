@@ -11,6 +11,9 @@ import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.datetime.LocalDateTime
 import kotlinx.html.*
 import kotlin.reflect.KProperty
@@ -18,6 +21,8 @@ import kotlin.reflect.KProperty
 expect suspend inline fun <reified RESP: Any> postForm(state: FormState<RESP>): RESP
 
 sealed class FormField<T: Any?>
+
+typealias FormValidatorFunc = FormValidator.() -> Unit
 
 class ValueField<T: Any?>(
         val value: T
@@ -87,6 +92,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
 
     val inputs = hashMapOf<String, FormField<*>>()
     val _error = MutableStateFlow<String?>(null)
+    val validators = arrayListOf<FormValidatorFunc>()
 
     fun addInput(input: InputField<*>) {
         inputs[input.name] = input
@@ -96,8 +102,21 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         inputs[property.name] = ValueField(value)
     }
 
+    private fun validateAllCustom(): HashMap<String, String> {
+        return hashMapOf<String, String>().apply {
+            validateCustom(endpoint.validator)?.let {
+                putAll(it)
+            }
+            validators.forEach {
+                validateCustom(it)?.let { validator ->
+                    putAll(validator)
+                }
+            }
+        }
+    }
+
     fun validateTouched() {
-        val custom = validateCustom()
+        val custom = validateAllCustom()
 
         inputs.filter { (it.value as? InputField<*>)?.touched ?: false }.forEach {
             val input = it.value as InputField<*>
@@ -106,7 +125,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
                 input.error.value = "Kötelező megadni"
             }
             else {
-                val customError = custom?.get(it.key)
+                val customError = custom.get(it.key)
                 input.error.value = customError
             }
         }
@@ -115,7 +134,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
     fun validateAll(): Boolean {
         var valid = true
 
-        val custom = validateCustom()
+        val custom = validateAllCustom()
 
         inputs.filter { it.value is InputField<*> }.forEach {
             val input = it.value as InputField<*>
@@ -127,7 +146,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
                 if (valid) valid = false
             }
             else {
-                val customError = custom?.get(it.key)
+                val customError = custom[it.key]
                 input.error.value = customError
 
                 if (customError != null && valid)
@@ -137,8 +156,8 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         return valid
     }
 
-    private fun validateCustom() : Map<String, String>? {
-        val validator = endpoint.validator ?: return null
+    private fun validateCustom(_validator: FormValidatorFunc?) : Map<String, String>? {
+        val validator = _validator ?: return null
 
         // Create snapshot of every input value
         val snapshot = inputs.filterValues { it is InputField<*> }.mapValues {
@@ -166,6 +185,8 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         return FormState(endpoint).also {
             it.inputs.putAll(inputs)
             it.inputs.putAll(formState.inputs)
+            it.validators.addAll(validators)
+            it.validators.addAll(formState.validators)
         }
     }
 
@@ -276,8 +297,16 @@ class InputValidator(val inputs: Map<String, Any?>) {
 
 inline fun <reified RESP: Any> FlowContent.Form(
         endpoint: FormEndpoint<*, RESP>,
+        noinline validator: FormValidatorFunc? = null,
         crossinline body: FormBuilder<RESP>.() -> Unit,
-) = Form(FormState(endpoint), body)
+) = Form(
+    FormState(endpoint).apply {
+        validator?.let {
+            validators.add(validator)
+        }
+    },
+    body
+)
 
 inline fun <reified RESP: Any> FlowContent.Form(
         state: FormState<RESP>,
@@ -311,6 +340,13 @@ inline fun <reified T: Any?> FlowContent.InputComp(
 ) {
     val state: FormState<*> = locate()
 
+    launch {
+        input.valueAttr.drop(1).collectLatest {
+            input.touch()
+            state.validateTouched()
+        }
+    }
+
     div("w-full px-3 mb-6 $wrapperClasses") {
         label("block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") {
             htmlFor = label
@@ -338,10 +374,7 @@ inline fun <reified T: Any?> FlowContent.InputComp(
 //                input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
 //            }
             onInput { _, elem ->
-                state.touch(input)
-
                 input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
-                state.validateTouched()
             }
         }
         divOf(input.error) { msg ->
@@ -359,11 +392,18 @@ fun FlowContent.CheckBoxComp(
 ) {
     val state: FormState<*> = locate()
 
+    launch {
+        input.valueAttr.drop(1).collectLatest {
+            input.touch()
+            state.validateTouched()
+        }
+    }
+
     div("flex items-start") {
         onClick {
-            input.touch()
+//            input.touch()
             input.valueAttr.value = input.valueAttr.value?.not()
-            state.validateTouched()
+//            state.validateTouched()
         }
 
         div("flex items-center h-5") {

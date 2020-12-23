@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 abstract class BuildContextBase(
         val id: String,
         val skipnContext: SkipnContext,
-        val pinningContext: PinningContext
+        val pinningContext: PinningContext,
 ) {
     var childBuilderContexts: ArrayList<BuildContextBase>? = null
     private var onDisposeListeners: ArrayList<() -> Unit>? = null
