@@ -6,7 +6,7 @@ plugins {
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.9952"
+version = "0.0.9956"
 val kversion = "1.4.2"
 
 repositories {

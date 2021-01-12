@@ -3,6 +3,7 @@ package io.skipn.form
 import io.skipn.FileData
 import io.skipn.FormEndpoint
 import io.skipn.builder.launch
+import io.skipn.elements.DomElement
 import io.skipn.events.*
 import io.skipn.form.InputField.Companion.convertType
 import io.skipn.observers.attributeOf
@@ -223,13 +224,14 @@ class FormBuilder<RESP: Any>(val elem: FORM, val state: FormState<RESP>) {
     }
 
     fun KProperty<Boolean>.CheckBox(
-        text: String,
+        text: String? = null,
+        body: DomElement? = null,
         default: Boolean = false
     ): InputField<Boolean> {
         val input = state.findOrCreate(this, default)
 
         with(elem) {
-            CheckBoxComp(input, text)
+            CheckBoxComp(input, text, body)
         }
 
         return input
@@ -388,7 +390,8 @@ inline fun <reified T: Any?> FlowContent.InputComp(
 
 fun FlowContent.CheckBoxComp(
     input: InputField<Boolean>,
-    text: String,
+    text: String? = null,
+    body: DomElement? = null
 ) {
     val state: FormState<*> = locate()
 
@@ -400,10 +403,10 @@ fun FlowContent.CheckBoxComp(
     }
 
     div("flex items-start") {
-        onClick {
-//            input.touch()
-            input.valueAttr.value = input.valueAttr.value?.not()
-//            state.validateTouched()
+        if (text != null) {
+            onClick {
+                input.valueAttr.value = input.valueAttr.value?.not()
+            }
         }
 
         div("flex items-center h-5") {
@@ -417,8 +420,13 @@ fun FlowContent.CheckBoxComp(
             }
         }
         div("ml-3 text-sm") {
-            span("form-input") {
-                +text
+            text?.let {
+                span("form-input") {
+                    +text
+                }
+            }
+            body?.let {
+                body()
             }
         }
     }

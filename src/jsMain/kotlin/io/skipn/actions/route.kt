@@ -14,6 +14,8 @@ actual fun routePage(route: String) {
 //    Skipn.context.route.value = Route(route, curRoute.route)
 }
 
+class RouteState(val url: String)
+
 actual fun changeParameter(key: String, parameter: String) {
     Skipn.context.router.changeParameter(key, parameter)
 }
@@ -21,5 +23,5 @@ actual fun changeParameter(key: String, parameter: String) {
 internal actual fun updateUrlParameter(parameters: String) {
     val route = if (parameters.isEmpty()) window.location.pathname
     else window.location.pathname + "?$parameters"
-    window.history.replaceState(null, route, route)
+    window.history.pushState(null, route, route)
 }

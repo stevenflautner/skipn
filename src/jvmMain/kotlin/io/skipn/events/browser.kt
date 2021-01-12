@@ -47,3 +47,7 @@ actual fun FlowContent.onDispose(onDispose: (BrowserElement) -> Unit) {
 actual fun FlowContent.onScroll(onScroll: (BrowserElement) -> Unit) {
     prepareElement()
 }
+
+actual fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit) {
+    prepareElement()
+}

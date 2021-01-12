@@ -6,14 +6,76 @@ package io.skipn.actions
 import io.skipn.Endpoint
 import io.skipn.SkipnContext
 import io.skipn.builder.BuildContext
+import io.skipn.errors.ApiError
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
-expect inline fun <reified RESP : Any> loader(
+typealias ResponseSuccess <RESP> = (RESP) -> Unit
+typealias ResponseFailure = (ApiError) -> Unit
+
+//@OptIn(ExperimentalContracts::class)
+//inline fun <RESP: Any> Response<RESP>.fold(
+//    onSuccess: ResponseSuccess<RESP>,
+//    onFailure: ResponseFailure
+//) {
+//    contract {
+//        callsInPlace(onSuccess, InvocationKind.AT_MOST_ONCE)
+//        callsInPlace(onFailure, InvocationKind.AT_MOST_ONCE)
+//    }
+//    return when (val success = success) {
+//        null -> onFailure(apiError ?: ApiError("Internal Api error"))
+//        else -> onSuccess(success)
+//    }
+//}
+
+class Response<RESP: Any> {
+    var apiError: ApiError? = null
+    var success: RESP? = null
+
+    var task: LoadTask<RESP>? = null
+
+    internal var onSuccess: ((RESP) -> Unit)? = null
+    internal var onFailure: ((ApiError) -> Unit)? = null
+
+    fun success(resp: RESP) {
+        this.success = resp
+        onSuccess?.invoke(resp)
+    }
+
+    fun cancel() {
+        task?.cancel()
+    }
+
+    fun fail(error: ApiError) {
+        apiError = error
+        onFailure?.invoke(error)
+    }
+}
+
+fun <RESP: Any> Response<RESP>.onSuccess(onSuccess: ResponseSuccess<RESP>): Response<RESP> {
+    this.onSuccess = onSuccess
+    success?.let {
+        onSuccess(it)
+    }
+    return this
+}
+
+fun <RESP: Any> Response<RESP>.onFailure(onFailure: ResponseFailure): Response<RESP> {
+    this.onFailure = onFailure
+    apiError?.let {
+        onFailure(it)
+    }
+    return this
+}
+
+expect inline fun <reified RESP: Any> loader(
     skipnContext: SkipnContext,
     noinline load: suspend () -> RESP,
-    noinline onSuccess: ((RESP) -> Unit)?
-) : LoadTask<RESP>
+    response: Response<RESP>
+)
 
 expect inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
     skipnContext: SkipnContext,
@@ -21,27 +83,30 @@ expect inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
     request: REQ
 ) : suspend () -> RESP
 
-expect class LoadTask<RESP : Any>(load: suspend () -> RESP, onSuccess: ((RESP) -> Unit)?) {
-
-    var response: RESP?
-
-    fun execute()
+expect class LoadTask<RESP : Any>(
+    load: suspend () -> RESP,
+) {
+    fun execute(onSuccess: ResponseSuccess<RESP>, onFailure: ResponseFailure)
     fun cancel()
 }
 
 inline fun <reified REQ: Any, reified RESP: Any> BuildContext.load(
         endpoint: Endpoint<REQ, RESP>,
-        request: REQ,
-        body: LoadBuilder<REQ, RESP>.() -> Unit): LoadTask<RESP> {
+        request: REQ): Response<RESP> {
 
-    val builder = LoadBuilder(endpoint).apply(body)
-    return loader(skipnContext, endpointFunc(skipnContext, endpoint, request), builder.onSuccess)
+    return Response<RESP>().also {
+        loader(skipnContext, endpointFunc(skipnContext, endpoint, request), it)
+    }
 }
 
-class LoadBuilder<REQ: Any, RESP: Any>(private val endpoint: Endpoint<REQ, RESP>) {
-    var onSuccess: ((RESP) -> Unit)? = null
+inline fun <reified REQ: Any, reified RESP: Any> Endpoint<REQ, RESP>.request(request: REQ, context: BuildContext): Response<RESP> {
+    return context.load(this, request)
 }
 
-fun <RESP: Any> LoadBuilder<*, RESP>.onSuccess(onSuccess: (RESP) -> Unit) {
-    this.onSuccess = onSuccess
-}
+//class LoadBuilder<REQ: Any, RESP: Any>(private val endpoint: Endpoint<REQ, RESP>) {
+//    var onSuccess: ((RESP) -> Unit)? = null
+//}
+//
+//fun <RESP: Any> LoadBuilder<*, RESP>.onSuccess(onSuccess: (RESP) -> Unit) {
+//    this.onSuccess = onSuccess
+//}

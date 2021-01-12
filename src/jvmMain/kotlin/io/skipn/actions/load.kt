@@ -2,40 +2,38 @@ package io.skipn.actions
 
 import io.skipn.Endpoint
 import io.skipn.SkipnContext
+import io.skipn.errors.BrowserOnlyFunction
 import kotlinx.coroutines.runBlocking
-import kotlin.reflect.full.primaryConstructor
 
 actual class LoadTask<RESP : Any> actual constructor(
     private val load: suspend () -> RESP,
-    private val onSuccess: ((RESP) -> Unit)?
 ) {
 
-    actual var response: RESP? = null
-
-    actual fun execute() {
+    actual fun execute(onSuccess: ResponseSuccess<RESP>, onFailure: ResponseFailure) {
         runBlocking {
-            load().let {
-                response = it
-                onSuccess?.invoke(it)
-            }
+            onSuccess.invoke(load())
         }
     }
 
     actual fun cancel() {
+        throw BrowserOnlyFunction
     }
 }
 
 actual inline fun <reified RESP : Any> loader(
     skipnContext: SkipnContext,
     noinline load: suspend () -> RESP,
-    noinline onSuccess: ((RESP) -> Unit)?
-): LoadTask<RESP> {
-    val task = LoadTask(load, { response ->
-        skipnContext.resources.add(response)
-        onSuccess?.invoke(response)
-    })
-    task.execute()
-    return task
+    response: Response<RESP>
+) {
+    LoadTask(load).execute(
+        onSuccess = { loadResponse ->
+            skipnContext.resources.add(loadResponse)
+            response.success = loadResponse
+        },
+        onFailure = {
+            response.apiError = it
+        }
+    )
 }
 
 actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(

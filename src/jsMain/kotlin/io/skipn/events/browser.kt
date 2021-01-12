@@ -153,3 +153,12 @@ actual fun FlowContent.onScroll(onScroll: (BrowserElement) -> Unit) {
         onScroll(BrowserElement(elem))
     }
 }
+
+actual fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit) {
+    val elem = prepareElement()
+    elem as GlobalEventHandlers
+
+    elem.onkeyup = {
+        onKeyUp(it.key)
+    }
+}

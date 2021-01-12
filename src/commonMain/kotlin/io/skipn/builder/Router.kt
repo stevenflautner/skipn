@@ -44,7 +44,7 @@ class Router(fullRoute: String) {
         }
     }
 
-    fun changeParameter(key: String, newValue: String?) {
+    fun changeParameter(key: String, newValue: Any?) {
         val parametersBuilder = ParametersBuilder().apply {
             parameters.forEach { s, list ->
                 appendAll(s, list)
@@ -54,7 +54,7 @@ class Router(fullRoute: String) {
         if (newValue == null) {
             parametersBuilder.remove(key)
         } else {
-            parametersBuilder[key] = newValue
+            parametersBuilder[key] = newValue.toString()
         }
 
         val newParameters = parametersBuilder.build().also {
@@ -62,13 +62,13 @@ class Router(fullRoute: String) {
         }
 
         updateUrlParameter(newParameters.formUrlEncode())
-        stream.tryEmit(ParameterChange(key, newValue))
+        stream.tryEmit(ParameterChange(key, newValue?.toString()))
     }
 
     fun changeRoute(urlPath: String) {
         val url = URLBuilder(urlPath)
-        updateParameters(url)
         updateRoute(url)
+        updateParameters(url)
     }
 
     private fun updateRoute(url: URLBuilder) {

@@ -54,7 +54,7 @@ object Skipn {
             DEV = byId("skipn-main-script").getAttribute("data-dev") == "true"
 
             window.onpopstate = {
-                routePage(window.location.pathname)
+                context.router.changeRoute(window.location.href)
             }
 
             val rootBuildContext = BuildContext.createRoot(skipnContext)

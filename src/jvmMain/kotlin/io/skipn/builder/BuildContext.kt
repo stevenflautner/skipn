@@ -21,6 +21,10 @@ actual class BuildContext(
         }
     }
 
+    actual fun launchOnDesktop(block: suspend CoroutineScope.() -> Unit) {
+        // Empty function, should have an empty body
+    }
+
     actual fun launch(block: suspend CoroutineScope.() -> Unit) {
         // Empty function, should have an empty body
     }

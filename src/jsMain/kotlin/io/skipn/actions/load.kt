@@ -6,59 +6,48 @@ import io.skipn.Endpoint
 import io.skipn.platform.DEV
 import io.skipn.SkipnContext
 import io.skipn.api
-import io.skipn.utils.decodeFromStringStatic
-import io.skipn.utils.encodeToStringStatic
+import io.skipn.errors.ApiError
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 
 actual inline fun <reified RESP : Any> loader(
     skipnContext: SkipnContext,
     noinline load: suspend () -> RESP,
-    noinline onSuccess: ((RESP) -> Unit)?
-) : LoadTask<RESP> {
-    val task = LoadTask(load, onSuccess)
-
-    if (skipnContext.isInitializing) {
-
-        if (DEV) {
-            task.execute()
-        }
-        else {
-            // No need to execute task just preload response
-            // that was provided as a resource from the Skipn Server
-            skipnContext.resources.get<RESP>().let {
-                task.response = it
-                onSuccess?.invoke(it)
-            }
-        }
+    response: Response<RESP>,
+) {
+    if (skipnContext.isInitializing && !DEV) {
+        // No need to execute task just preload response
+        // that was provided as a resource from the Skipn Server
+        response.success = skipnContext.resources.get<RESP>()
     } else {
-        task.execute()
+        response.task = LoadTask(load).apply {
+            execute(
+                onSuccess = {
+                    response.success(it)
+                },
+                onFailure = {
+                    response.fail(it)
+                }
+            )
+        }
     }
-    return task
 }
 
 actual class LoadTask<RESP : Any> actual constructor(
     private val load: suspend () -> RESP,
-    private val onSuccess: ((RESP) -> Unit)?
 ) {
 
     private var job: Job? = null
-    actual var response: RESP? = null
 
-    actual fun execute() {
-        GlobalScope.apply {
-            job = launch {
-                load().let {
-                    response = it
-                    onSuccess?.invoke(it)
-                }
+    actual fun execute(onSuccess: ResponseSuccess<RESP>, onFailure: ResponseFailure) {
+        try {
+            job = GlobalScope.launch {
+                onSuccess(load())
             }
+        } catch (e: ApiError) {
+            onFailure(e)
         }
     }
 

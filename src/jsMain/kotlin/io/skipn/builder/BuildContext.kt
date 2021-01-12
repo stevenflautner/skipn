@@ -4,8 +4,6 @@ import io.skipn.SkipnContext
 import io.skipn.ensureRunAfterInitialization
 import io.skipn.provide.PinningContext
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlinx.html.FlowContent
 
 actual class BuildContext(
         id: String,
@@ -26,6 +24,20 @@ actual class BuildContext(
                 targetScope.launch(block = block)
             }
         }
+    }
+
+    actual fun launchOnDesktop(block: suspend CoroutineScope.() -> Unit) {
+//        val targetScope = coroutineScope
+        skipnContext.device.runOnDesktop(this, block)
+
+
+//        ensureRunAfterInitialization {
+//            if (targetScope == coroutineScope) {
+//                skipnContext.device.runOnDesktop(this) {
+//                    targetScope.launch(block = block)
+//                }
+//            }
+//        }
     }
 
     fun cancelAndCreateScope(parentScope: CoroutineScope) {

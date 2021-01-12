@@ -12,6 +12,8 @@ expect class BuildContext : BuildContextBase {
 
     fun launch(block: suspend CoroutineScope.() -> Unit)
 
+    fun launchOnDesktop(block: suspend CoroutineScope.() -> Unit)
+
     fun getRouteLevel(): Int
 
 }
@@ -20,5 +22,9 @@ val FlowContent.buildContext: BuildContext
     get() = builder.currentBuildContext
 
 fun FlowContent.launch(block: suspend CoroutineScope.() -> Unit) = buildContext.launch(block)
+
+
+
+fun FlowContent.launchOnDesktop(block: suspend CoroutineScope.() -> Unit) = buildContext.launch(block)
 
 //expect fun <T: Any?, FLOW: Flow<T>, RES: Any?> FlowContent.stateIn(flow: FLOW, initialValue: (FLOW) -> RES)

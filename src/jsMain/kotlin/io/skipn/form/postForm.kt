@@ -13,28 +13,24 @@ actual suspend inline fun <reified RESP: Any> postForm(state: FormState<RESP>): 
             defaultSerializer()
 
             body = MultiPartFormDataContent(
-                    formData {
+                formData {
 
-                        // TODO SUPPORT UPLOAD OF FILES WITH APPROPRIATE HEADERS
-                        state.inputs.forEach { entry ->
-                            val field = entry.value
-
-                            when (field) {
-                                is InputField -> {
-                                    field.valueAttr.value?.let {
-                                        append(entry.key, it.toString())
-                                    }
-                                }
-                                is ValueField -> {
-                                    field?.let {
-                                        append(entry.key, it.toString())
-                                    }
-//                                    append(it.key, field.toString())
+                    // TODO SUPPORT UPLOAD OF FILES WITH APPROPRIATE HEADERS
+                    state.inputs.forEach { entry ->
+                        when (val field = entry.value) {
+                            is InputField -> {
+                                field.valueAttr.value?.let {
+                                    append(entry.key, it.toString())
                                 }
                             }
+                            is ValueField -> {
+                                append(entry.key, field.toString())
+//                               append(it.key, field.toString())
+                            }
                         }
-
                     }
+
+                }
             )
         }
     } catch (e: Exception) {
