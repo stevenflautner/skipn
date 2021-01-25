@@ -1,6 +1,7 @@
 package io.skipn.observers
 
 import io.skipn.prepareElement
+import io.skipn.state.StatefulValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,30 +13,40 @@ import kotlinx.html.div
 
 @HtmlTagMarker
 actual fun <V, T> FlowContent.divOf(
-    stateFlow: StateFlow<V>,
+    statefulValue: StatefulValue<V>,
     node: DIV.(V) -> T
 ) {
     div {
         prepareElement()
-        node(stateFlow.value)
+        node(statefulValue.value)
     }
 }
-
-@HtmlTagMarker
-actual fun FlowContent.divOf(
-        flow: Flow<*>,
-        node: DIV.() -> Unit
-) {
-    div {
-        prepareElement()
-        node()
-    }
-}
-
-@HtmlTagMarker
-actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {
-    div {
-        prepareElement()
-        node(initialValue)
-    }
-}
+//@HtmlTagMarker
+//actual fun <V, T> FlowContent.divOf(
+//    stateFlow: StateFlow<V>,
+//    node: DIV.(V) -> T
+//) {
+//    div {
+//        prepareElement()
+//        node(stateFlow.value)
+//    }
+//}
+//
+//@HtmlTagMarker
+//actual fun FlowContent.divOf(
+//        flow: Flow<*>,
+//        node: DIV.() -> Unit
+//) {
+//    div {
+//        prepareElement()
+//        node()
+//    }
+//}
+//
+//@HtmlTagMarker
+//actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {
+//    div {
+//        prepareElement()
+//        node(initialValue)
+//    }
+//}

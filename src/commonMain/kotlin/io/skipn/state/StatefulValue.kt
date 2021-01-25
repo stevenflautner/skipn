@@ -4,11 +4,15 @@ import kotlin.properties.Delegates
 
 typealias Observer<T> = (T) -> Unit
 
-interface StatefulValue<out T> {
+interface StatefulValue<T> {
     val value: T
+
+    fun observe(observer: Observer<T>): Observer<T>
+
+    fun removeObserver(observer: Observer<T>)
 }
 
-open class MutableStatefulValue<T>(value: T): StatefulValue<T> {
+class MutableStatefulValue<T>(value: T): StatefulValue<T> {
 
     protected val observers = mutableListOf<Observer<T>>()
 
@@ -18,15 +22,33 @@ open class MutableStatefulValue<T>(value: T): StatefulValue<T> {
         }
     }
 
-    fun observe(observer: Observer<T>): Observer<T> {
+    override fun observe(observer: Observer<T>): Observer<T> {
         return observer.also {
             observers += observer
         }
     }
 
-    fun removeObserver(observer: Observer<T>) {
+    override fun removeObserver(observer: Observer<T>) {
         observers -= observer
     }
 
     fun asStatefulValue() = this as StatefulValue<T>
 }
+
+fun <T1, T2, T> StatefulValue<T1>.combine(second: StatefulValue<T2>, transform: (T1, T2) -> T): StatefulValue<T> {
+    val combined = mutableStatefulValueOf(transform(this.value, second.value))
+
+    fun update() {
+        combined.value = transform(this.value, second.value)
+    }
+
+    observe {
+        update()
+    }
+    second.observe {
+        update()
+    }
+    return combined
+}
+
+fun <T> mutableStatefulValueOf(value: T) = MutableStatefulValue(value)
