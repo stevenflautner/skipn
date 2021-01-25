@@ -16,7 +16,7 @@ actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
     div {
         var element = prepareElement()
         val parentContext = buildContext
-        val parentScope = parentContext.coroutineScope
+        val parentScope = parentContext.getCoroutineScope()
 
         val route = skipnContext.router.routeFor(parentContext.getRouteLevel())
 
@@ -31,7 +31,7 @@ actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
         parentScope.launch {
             skipnContext.router.filterRouteChangesFor(parentContext.getRouteLevel()).collect { change ->
                 context.cancelAndCreateScope(parentScope)
-                context.coroutineScope.launch {
+                context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {
                         node(change)
                     }
@@ -46,9 +46,9 @@ actual fun FlowContent.parameter(key: String, node: DIV.(String?) -> Unit) {
     div {
         var element = prepareElement()
         val parentContext = buildContext
-        val parentScope = parentContext.coroutineScope
+        val parentScope = parentContext.getCoroutineScope()
 
-        val route = skipnContext.router.parameterFor(key)
+        val route = skipnContext.router.getParameterValue(key)
 
         // Creates a new Build Context
         // as a copy of the current one
@@ -61,7 +61,7 @@ actual fun FlowContent.parameter(key: String, node: DIV.(String?) -> Unit) {
         parentScope.launch {
             skipnContext.router.filterParameterChangesFor(key).collect { change ->
                 context.cancelAndCreateScope(parentScope)
-                context.coroutineScope.launch {
+                context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {
                         node(change)
                     }

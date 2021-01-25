@@ -9,7 +9,7 @@ import kotlinx.html.FORM
 import kotlinx.html.FlowContent
 
 expect fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit)
-expect fun FlowContent.onClick(ignoreChildren: Boolean = false, onClick: (() -> Unit)? = null)
+expect fun FlowContent.onClick(ignoreChildren: Boolean = false, onClick: ((Event) -> Unit)? = null)
 expect fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit)
 expect fun FlowContent.onHover(onHover: (Boolean) -> Unit)
 expect inline fun <reified RESP: Any> FORM.attachSubmitHandler(

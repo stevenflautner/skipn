@@ -6,6 +6,9 @@ package io.skipn.builder
 import io.ktor.http.*
 import io.skipn.actions.updateUrlParameter
 import io.skipn.skipnContext
+import io.skipn.state.StatefulValue
+import io.skipn.utils.mutableStateFlowOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
 import kotlinx.html.FlowContent
@@ -29,9 +32,9 @@ class Router(fullRoute: String) {
         else it
     }
 
-    fun parameterFor(key: String) = parameters[key]
+    fun getParameterValue(key: String) = parameters[key]
 
-    private val stream = MutableSharedFlow<Change>(extraBufferCapacity = 1)
+    val stream = MutableSharedFlow<Change>(extraBufferCapacity = 2)
 
     private fun parseRoute(_fullRoute: String): List<String> {
         val fullRoute = _fullRoute.removePrefix("/")
@@ -118,10 +121,23 @@ class Router(fullRoute: String) {
                 stream.tryEmit(ParameterChange(it.key, newValue))
             }
         }
+
+        val a = mutableStateFlowOf(12)
+        a.asStateFlow().value
+
     }
 
-    fun filterRouteChangesFor(level: Int) = stream.filterIsInstance<RouteChange>().filter { it.level == level }.map { it.route }
-    fun filterParameterChangesFor(key: String) = stream.filterIsInstance<ParameterChange>().filter { it.key == key }.map { it.value }
+    fun filterRouteChangesFor(level: Int) =
+        stream.filterIsInstance<RouteChange>().filter { it.level == level }.map { it.route }
+
+    fun filterParameterChangesFor(key: String) = stream.filterIsInstance<ParameterChange>()
+        .filter { it.key == key }
+        .map { it.value }
+
+    fun parameter(key: String, scope: CoroutineScope) = stream.filterIsInstance<ParameterChange>()
+        .filter { it.key == key }
+        .map { it.value }
+        .stateIn(scope, SharingStarted.Eagerly, getParameterValue(key))
 }
 
 interface Change
@@ -134,5 +150,6 @@ val FlowContent.router: Router
 val BuildContext.currentRoute: StateFlow<String?>
     get() = skipnContext.router.filterRouteChangesFor(getRouteLevel()).stateIn(GlobalScope, SharingStarted.Lazily, skipnContext.router.routeFor(getRouteLevel()))
 
+fun BuildContext.parameter(key: String) = skipnContext.router.parameter(key, getCoroutineScope())
 
 val FlowContent.currentRoute: StateFlow<String?> get() = buildContext.currentRoute

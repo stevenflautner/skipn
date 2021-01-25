@@ -20,8 +20,8 @@ class PinningContext(parent: PinningContext?) {
         ArrayDeque<PinBucket>()
     }
 
-    // Caches the next element to be disposed
-    private var nextToDispose : PinBucket? = null
+//     Caches the next element to be disposed
+//    private var nextToDispose : PinBucket? = null
 
     // The base corresponds to the provided instances up until
     // this PinBucket, that the parent PinBucket collected within

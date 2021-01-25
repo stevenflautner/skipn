@@ -3,6 +3,9 @@
 
 package io.skipn.html
 
+import io.skipn.actions.routePage
+import io.skipn.elements.DomElement
+import io.skipn.events.onClick
 import kotlinx.html.*
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
@@ -52,4 +55,17 @@ fun HtmlApp.head(head: HEAD.() -> Unit) {
 @HtmlTagMarker
 fun HtmlApp.body(body: BODY.() -> Unit) {
     this.body = body
+}
+
+@HtmlTagMarker
+fun FlowContent.Link(href: String?, classes: String? = null, body: DomElement? = null) {
+    a(href = href, classes = classes) {
+        href?.let {
+            onClick {
+                it.preventDefault()
+                routePage(href)
+            }
+        }
+        body?.invoke(this)
+    }
 }

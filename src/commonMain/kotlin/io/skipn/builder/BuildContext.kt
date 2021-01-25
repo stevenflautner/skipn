@@ -16,6 +16,8 @@ expect class BuildContext : BuildContextBase {
 
     fun getRouteLevel(): Int
 
+    fun getCoroutineScope(): CoroutineScope
+
 }
 
 val FlowContent.buildContext: BuildContext

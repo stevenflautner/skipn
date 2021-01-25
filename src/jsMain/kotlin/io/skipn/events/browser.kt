@@ -34,13 +34,13 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
 }
 
 @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
-actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: (() -> Unit)?) {
+actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((Event) -> Unit)?) {
     if (onClick == null) return
     val elem = prepareElement() as GlobalEventHandlers
 
     elem.onclick = {
         if (it.target != elem && ignoreChildren) null
-        else onClick()
+        else onClick(Event(it))
     }
 }
 

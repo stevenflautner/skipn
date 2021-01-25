@@ -1,24 +1,29 @@
 package io.skipn
 
 import io.ktor.application.*
-import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.util.pipeline.*
 import io.skipn.form.FormValidator
-import io.skipn.utils.decodeFromStringStatic
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
-actual abstract class EndpointBase<REQ : Any, RESP : Any> actual constructor(path: String) {
-    actual val route = "/api$path"
+//fun String.toDashCase() = replace(humps, "-").toLowerCase()
+//private val humps = "(?<=.)(?=\\p{Upper})".toRegex()
+//
+////val camelRegex = "(?<=[a-zA-Z])[A-Z]".toRegex()
+////
+////fun String.camelToSnakeCase(): String {
+////    return camelRegex.replace(this) {
+////        "-${it.value}"
+////    }.toLowerCase()
+////}
+//
+//
+actual abstract class EndpointBase<REQ : Any, RESP : Any> {
+
+    val route = parseApiRoute(this)
     lateinit var implementedFunc: suspend ApplicationCall.(REQ) -> RESP
-}
 
-//actual abstract class Endpoint<REQ: Any, RESP: Any> actual constructor(path: String) {
-//    lateinit var implementedFunc: suspend ApplicationCall.(REQ) -> RESP
-//}
+}
 
 inline fun <reified REQ: Any, RESP: Any> Routing.endpoint(
     endpoint: Endpoint<REQ, RESP>,

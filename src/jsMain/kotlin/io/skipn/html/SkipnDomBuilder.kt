@@ -19,7 +19,7 @@ class JSDOMBuilder<out R : HTMLElement>(
         val document: Document,
         override val rootBuildContext: BuildContext
 ) : TagConsumer<R>, Builder {
-    private val path = arrayListOf<HTMLElement>()
+    val path = arrayListOf<HTMLElement>()
     private var lastLeaved : HTMLElement? = null
 
     override val builderContextTree: ArrayDeque<BuildContext> = ArrayDeque(1)

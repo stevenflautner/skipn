@@ -6,13 +6,14 @@ import io.skipn.provide.PinningContext
 import kotlinx.coroutines.*
 
 actual class BuildContext(
-        id: String,
-        skipnContext: SkipnContext,
-        pinningContext: PinningContext,
-        private val routeLevel: Int,
+    id: String,
+    skipnContext: SkipnContext,
+    pinningContext: PinningContext,
+    private val routeLevel: Int,
+    private var coroutineScope: CoroutineScope
 ) : BuildContextBase(id, skipnContext, pinningContext) {
 
-    lateinit var coroutineScope: CoroutineScope
+    actual fun getCoroutineScope(): CoroutineScope = coroutineScope
 
     // Launches coroutine only if the current coroutineScope did not
     // change while the initialization process ran
@@ -43,33 +44,31 @@ actual class BuildContext(
     fun cancelAndCreateScope(parentScope: CoroutineScope) {
         // Cancel the current coroutine context
         // and replace it with a new one
-        coroutineScope.cancel()
+        coroutineScope.coroutineContext.cancelChildren()
 
-        // Create new coroutine scope
-        // and rebuild the child tree with it
-        coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
+//        // Create new coroutine scope
+//        // and rebuild the child tree with it
+//        coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
     }
 
     companion object {
         fun create(id: String, parent: BuildContext, routeLevel: Int): BuildContext {
             return BuildContext(
-                    id,
-                    parent.skipnContext,
-                    PinningContext(parent = parent.pinningContext),
-                    routeLevel
-            ).apply {
-                coroutineScope = CoroutineScope(SupervisorJob(parent.coroutineScope.coroutineContext.job))
-            }
+                id,
+                parent.skipnContext,
+                PinningContext(parent = parent.pinningContext),
+                routeLevel,
+                CoroutineScope(SupervisorJob(parent.coroutineScope.coroutineContext.job))
+            )
         }
         fun createRoot(skipnContext: SkipnContext): BuildContext {
             return BuildContext(
-                    "skipn-root",
-                    skipnContext,
-                    PinningContext(parent = null),
-                    0
-            ).apply {
-                coroutineScope = CoroutineScope(SupervisorJob())
-            }
+                "skipn-root",
+                skipnContext,
+                PinningContext(parent = null),
+                0,
+                CoroutineScope(SupervisorJob())
+            )
         }
     }
 

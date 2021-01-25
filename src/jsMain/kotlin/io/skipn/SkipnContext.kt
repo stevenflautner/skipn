@@ -1,6 +1,7 @@
 package io.skipn
 
 import io.skipn.builder.BuildContext
+import io.skipn.html.JSDOMBuilder
 import io.skipn.platform.DEV
 import io.skipn.platform.SkipnResources
 import io.skipn.utils.byId
@@ -14,12 +15,16 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 fun FlowContent.getUnderlyingHtmlElement(): HTMLElement {
-    var d = this.consumer.asDynamic()
-    if (d.downstream != null) {
-        d = d.downstream
-    }
-    val arr = d.path_0.toArray() as Array<HTMLElement>
-    return arr[arr.size - 1]
+    val consumer = this.consumer as JSDOMBuilder
+    return consumer.path[consumer.path.size - 1]
+
+//    var d = this.consumer.asDynamic()
+//    if (d.downstream != null) {
+//        d = d.downstream
+//    }
+//    val arr = d.path as Array<HTMLElement>
+////    val arr = d.path_0.toArray() as Array<HTMLElement>
+//    return arr[arr.size - 1]
 }
 
 fun FlowContent.prepareElement(): Element {
@@ -59,7 +64,7 @@ class DeviceActionBucket (
     val buildContext: BuildContext,
     action: DeviceFunction
 ) {
-    val coroutineScope = CoroutineScope(SupervisorJob(buildContext.coroutineScope.coroutineContext.job))
+    val coroutineScope = CoroutineScope(SupervisorJob(buildContext.getCoroutineScope().coroutineContext.job))
     val actions = listOf(action)
 
     fun launchAll() {
@@ -119,10 +124,10 @@ class Device {
 
     @OptIn(ExperimentalTime::class)
     private fun add(context: BuildContext, action: DeviceFunction, target: ArrayList<DeviceActionBucket>) {
-        val targetScope = context.coroutineScope
+        val targetScope = context.getCoroutineScope()
 
         ensureRunAfterInitialization {
-            if (context.coroutineScope != targetScope) return@ensureRunAfterInitialization
+            if (context.getCoroutineScope() != targetScope) return@ensureRunAfterInitialization
 
             val bucket = DeviceActionBucket(context, action)
             target.add(bucket)

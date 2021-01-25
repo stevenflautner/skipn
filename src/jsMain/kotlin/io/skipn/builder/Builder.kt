@@ -45,7 +45,7 @@ actual interface Builder {
     }
 
     fun descendBuilder(context: BuildContext) {
-        currentBuildContext.addChild(context)
+//        currentBuildContext.addChild(context)
         builderContextTree.addLast(context)
         currentBuildContext = context
     }

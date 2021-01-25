@@ -15,21 +15,28 @@ import org.w3c.dom.Element
 actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T) {
     div {
         var element = prepareElement()
-        val parentScope = buildContext.coroutineScope
+        val parentScope = buildContext.getCoroutineScope()
 
         // Creates a new Build Context
         // as a copy of the current one
         val context = builder.createContextAndDescend(element.id)
 
+        val currentValue = stateFlow.value
+
         // Run node first
-        node(stateFlow.value)
+        node(currentValue)
 
         // Listen for changes and ignore
         // first value emitted
         parentScope.launch {
-            stateFlow.drop(1).collect { value ->
+            // It's possible that by the time this coroutine runs,
+            // the current value of the stateflow changed.
+            // Then don't drop the first value
+            val drop = if (currentValue == stateFlow.value) 1 else 0
+
+            stateFlow.drop(drop).collect { value ->
                 context.cancelAndCreateScope(parentScope)
-                context.launch {
+                context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {
                         node(value)
                     }
@@ -46,7 +53,7 @@ actual fun FlowContent.divOf(
 ) {
     div {
         var element = prepareElement()
-        val parentScope = buildContext.coroutineScope
+        val parentScope = buildContext.getCoroutineScope()
 
         // Creates a new Build Context
         // as a copy of the current one
@@ -58,15 +65,12 @@ actual fun FlowContent.divOf(
         // Listen for changes and ignore
         // first value emitted
         parentScope.launch {
-            val drop =
-                if (flow is SharedFlow)
-                    flow.replayCache.size
-                else 0
+            val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
             // Drop all values in the replay cache
             // So we only notify newly emitted values
             flow.drop(drop).collect {
                 context.cancelAndCreateScope(parentScope)
-                context.coroutineScope.launch {
+                context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {
                         node()
                     }
@@ -88,5 +92,5 @@ fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit
 
 @HtmlTagMarker
 actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {
-    divOf(flow.stateIn(buildContext.coroutineScope, SharingStarted.Eagerly, initialValue), node)
+    divOf(flow.stateIn(buildContext.getCoroutineScope(), SharingStarted.Eagerly, initialValue), node)
 }

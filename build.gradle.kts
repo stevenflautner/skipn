@@ -1,12 +1,12 @@
 import java.util.*
 
 plugins {
-    kotlin("multiplatform") version "1.4.10"
+    kotlin("multiplatform") version "1.4.21"
     id("maven-publish")
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.9956"
+version = "0.0.99591"
 val kversion = "1.4.2"
 
 repositories {
@@ -22,11 +22,11 @@ repositories {
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
         }
         withJava()
     }
-    js {
+    js(LEGACY) {
         browser {
             testTask {
                 useKarma {
@@ -39,13 +39,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kversion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
                 implementation("io.ktor:ktor-client-core:$kversion")
                 implementation("io.ktor:ktor-client-json:$kversion")
                 implementation("io.ktor:ktor-client-serialization:$kversion")
-                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10")
+//                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
             }
         }
@@ -69,13 +69,9 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                implementation(npm("is-sorted", "1.0.5"))
-                implementation(devNpm("postcss-loader", "4.0.0"))
-                implementation(devNpm("postcss", "7.0.32"))
-                implementation(devNpm("raw-loader", ""))
-                implementation(npm("css-loader", "3.4.2"))
-                implementation(npm("style-loader", "1.1.3"))
-                implementation(npm("google-maps", "4.3.3"))
+//                implementation(devNpm("postcss-loader", "4.0.0"))
+//                implementation(devNpm("postcss", "7.0.32"))
+//                implementation(devNpm("raw-loader", ""))
             }
         }
         val jsTest by getting {

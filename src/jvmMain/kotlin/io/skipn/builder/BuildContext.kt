@@ -1,6 +1,7 @@
 package io.skipn.builder
 
 import io.skipn.SkipnContext
+import io.skipn.errors.BrowserOnlyFunction
 import io.skipn.provide.PinningContext
 import kotlinx.coroutines.CoroutineScope
 
@@ -10,6 +11,11 @@ actual class BuildContext(
         pinningContext: PinningContext,
         internal var routeLevel: Int
 ) : BuildContextBase(id, skipnContext, pinningContext) {
+
+    actual fun getCoroutineScope(): CoroutineScope {
+        throw BrowserOnlyFunction
+    }
+
     companion object {
         fun createRoot(skipnContext: SkipnContext): BuildContext {
             return BuildContext(

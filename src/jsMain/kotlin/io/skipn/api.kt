@@ -10,6 +10,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.skipn.Skipn.apiJson
 import io.skipn.errors.ApiError
+import io.skipn.platform.DEV
 import io.skipn.utils.decodeFromStringStatic
 import kotlinx.browser.window
 import org.w3c.dom.HTMLFormElement
@@ -46,9 +47,13 @@ val api = HttpClient {
         }
     }
     defaultRequest {
+        headers {
+            append("Origin", "http://localhost:8080")
+        }
 //        contentType(ContentType.Application.Json)
         host = window.location.hostname
-        port = window.location.port.toInt()
+        val currentPort = window.location.port.toInt()
+        port = if (DEV) currentPort + 1 else currentPort
     }
 }
 

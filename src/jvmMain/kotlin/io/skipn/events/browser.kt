@@ -13,7 +13,7 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
     prepareElement()
 }
 
-actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: (() -> Unit)?) {
+actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((Event) -> Unit)?) {
     if (onClick == null) return
     prepareElement()
 }

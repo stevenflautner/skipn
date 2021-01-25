@@ -1,6 +1,7 @@
 package io.skipn.ktor
 
 import io.ktor.application.*
+import io.ktor.client.features.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -79,7 +80,14 @@ fun Application.Skipn(
         method(HttpMethod.Get)
         method(HttpMethod.Post)
         method(HttpMethod.Delete)
+        method(HttpMethod.Options)
+//        host("localhost:8080")
         anyHost()
+        header(HttpHeaders.AccessControlAllowOrigin)
+        header(HttpHeaders.ContentType)
+        exposeHeader(HttpHeaders.ContentType)
+        exposeHeader(HttpHeaders.AccessControlAllowOrigin)
+
     }
     install(Compression) {
         gzip()

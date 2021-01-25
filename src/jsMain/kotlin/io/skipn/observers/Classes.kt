@@ -51,7 +51,6 @@ actual fun <T> FlowContent.attributeOf(
     // TODO CHANGE THIS TO VALUEOF
     updateElement(element, name, value())
 
-
     launch {
         flow.collect {
             updateElement(element, name, value())
@@ -60,5 +59,5 @@ actual fun <T> FlowContent.attributeOf(
 }
 
 actual fun <T> FlowContent.attributeOf(name: String, flow: Flow<T>, initialValue: T, value: (T) -> String) {
-    attributeOf(name, flow.stateIn(buildContext.coroutineScope, SharingStarted.Eagerly, initialValue), value)
+    attributeOf(name, flow.stateIn(buildContext.getCoroutineScope(), SharingStarted.Eagerly, initialValue), value)
 }
