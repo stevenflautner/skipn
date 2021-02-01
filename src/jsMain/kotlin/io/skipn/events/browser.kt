@@ -1,13 +1,12 @@
 package io.skipn.events
 
-import io.skipn.*
+import io.skipn.FormEndpoint
 import io.skipn.browser.BrowserElement
-import io.skipn.builder.builder
-import io.skipn.builder.launch
+import io.skipn.builder.buildContext
 import io.skipn.form.FormBuilder
+import io.skipn.prepareElement
+import io.skipn.skipnContext
 import kotlinx.browser.document
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
 import kotlinx.html.FORM
 import kotlinx.html.FlowContent
 import org.w3c.dom.GlobalEventHandlers
@@ -15,8 +14,6 @@ import org.w3c.dom.HTMLFormElement
 import org.w3c.dom.MutationObserver
 import org.w3c.dom.MutationObserverInit
 import org.w3c.xhr.FormData
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
 
 actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
     val element = prepareElement()
@@ -127,22 +124,11 @@ actual fun FlowContent.onInput(onInput: (String, BrowserElement) -> Unit) {
     }
 }
 
-@OptIn(ExperimentalTime::class)
 actual fun FlowContent.onDispose(onDispose: (BrowserElement) -> Unit) {
     val elem = prepareElement()
-    elem as GlobalEventHandlers
-
-    launch {
-        try {
-            delay(Duration.INFINITE)
-        } catch (e: CancellationException) {
-            onDispose(BrowserElement(elem))
-        }
+    buildContext.scope.onDispose {
+        onDispose(BrowserElement(elem))
     }
-
-//    builder.currentBuildContext.onDispose {
-//        onDispose(BrowserElement(elem))
-//    }
 }
 
 actual fun FlowContent.onScroll(onScroll: (BrowserElement) -> Unit) {

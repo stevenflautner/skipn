@@ -1,38 +1,31 @@
-package io.skipn.builder
+package io.skipn.observers
 
-import io.skipn.SkipnContext
-import io.skipn.provide.PinningContext
-
-abstract class BuildContextBase(
-        val id: String,
-        val skipnContext: SkipnContext,
-        val pinningContext: PinningContext,
-) {
-    var childBuilderContexts: ArrayList<BuildContextBase>? = null
+class Scope {
+    var childBuilderContexts: ArrayList<Scope>? = null
     private var onDisposeListeners: ArrayList<() -> Unit>? = null
-    private lateinit var parent: BuildContextBase
+    private lateinit var parent: Scope
 
-    private fun addChild(context: BuildContextBase) {
-        val childBuilderContexts = childBuilderContexts ?: arrayListOf<BuildContextBase>().also {
+    private fun addChild(scope: Scope) {
+        val children = childBuilderContexts ?: arrayListOf<Scope>().also {
             this.childBuilderContexts = it
         }
-        childBuilderContexts.add(context)
+        children.add(scope)
     }
 
     private fun detach() {
         parent.childBuilderContexts?.remove(this)
     }
 
-    fun attach(parent: BuildContextBase) {
+    fun attach(parent: Scope) {
         this.parent = parent
         parent.addChild(this)
     }
 
-    fun disposeChildrenTree() {
-        detach()
+    fun disposeChildren() {
         notifyDisposeListeners()
         childBuilderContexts?.forEach {
-            it.disposeChildrenTree()
+            it.detach()
+            it.disposeChildren()
         }
         childBuilderContexts = null
     }

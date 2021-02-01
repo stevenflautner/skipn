@@ -1,7 +1,8 @@
 package io.skipn.observers
 
 import io.skipn.prepareElement
-import io.skipn.state.StatefulValue
+import io.skipn.state.State
+import io.skipn.state.Stream
 import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLInputElement
@@ -23,18 +24,34 @@ private fun updateElement(element: Element, name: String, value: String) {
 
 actual fun <T> FlowContent.attributeOf(
     name: String,
-    statefulValue: StatefulValue<T>,
+    state: State<T>,
     value: (T) -> String
 ) {
     val element = prepareElement()
 
-    updateElement(element, name, value(statefulValue.value))
+    updateElement(element, name, value(state.value))
 
-    statefulValue.observe { newValue ->
+    state.observe { newValue ->
         // TODO CHANGE THIS TO VALUEOF
         updateElement(element, name, value(newValue))
     }
 }
+
+actual fun <T> FlowContent.attributeOf(
+    name: String,
+    stream: Stream<T>,
+    value: () -> String
+) {
+    val element = prepareElement()
+
+    updateElement(element, name, value())
+
+    stream.observe {
+        // TODO CHANGE THIS TO VALUEOF
+        updateElement(element, name, value())
+    }
+}
+
 //actual fun <T> FlowContent.attributeOf(
 //    name: String,
 //    stateFlow: StateFlow<T>,

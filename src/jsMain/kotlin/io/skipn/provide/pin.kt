@@ -2,13 +2,13 @@ package io.skipn.provide
 
 import io.skipn.builder.buildContext
 import io.skipn.prepareElement
-import kotlinx.coroutines.flow.StateFlow
+import io.skipn.state.State
 import kotlinx.html.FlowContent
 
-actual inline fun <reified V: Any?, T: StateFlow<V>> FlowContent.pin(stateFlow: T): T {
+actual inline fun <reified V: Any?, T: State<V>> FlowContent.pin(state: T): T {
     val id = prepareElement().id
-    buildContext.pinningContext.pinStateFlow(id, stateFlow)
-    return stateFlow
+    buildContext.pinningContext.pinState(id, state)
+    return state
 }
 
 actual inline fun <reified T : Any> FlowContent.pin(instance: T): T {

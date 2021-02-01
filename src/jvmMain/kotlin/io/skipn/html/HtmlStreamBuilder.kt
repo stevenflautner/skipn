@@ -23,7 +23,9 @@ class HTMLStreamBuilder<out O : Appendable>(
 //    override var routeLevel: Int = 0
     override val routerTree = ArrayDeque<String>()
 
-    override var currentBuildContext = rootBuildContext
+    override var currentBuildContext: BuildContext? = rootBuildContext
+
+    override fun getBuildContext(): BuildContext = currentBuildContext ?: throw IllegalStateException("Build Context was null")
 
     override fun onTagStart(tag: Tag) {
         if (prettyPrint && !tag.inlineTag) {

@@ -1,12 +1,8 @@
 package io.skipn.observers
 
-import io.skipn.state.StatefulValue
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.html.DIV
+import io.skipn.state.State
+import io.skipn.state.Stream
 import kotlinx.html.FlowContent
-import kotlinx.html.HtmlTagMarker
 
 class ClassesBuilder {
 
@@ -19,13 +15,23 @@ class ClassesBuilder {
     fun build(): String {
         return classes
     }
+
+    inline fun toggle(classes: String, predicate: () -> Boolean) {
+        if (predicate())
+            +classes
+    }
 }
 
 private const val CLASS_ATTR = "class"
 
-fun <T> FlowContent.classesOf(statefulValue: StatefulValue<T>, classes: ClassesBuilder.(T) -> Unit) {
-    attributeOf(CLASS_ATTR, statefulValue) { newValue ->
+fun <T> FlowContent.classesOf(state: State<T>, classes: ClassesBuilder.(T) -> Unit) {
+    attributeOf(CLASS_ATTR, state) { newValue ->
         buildClasses(classes, newValue)
+    }
+}
+fun <T> FlowContent.classesOf(stream: Stream<T>, classes: ClassesBuilder.() -> Unit) {
+    attributeOf(CLASS_ATTR, stream) {
+        buildClasses(classes)
     }
 }
 
@@ -50,7 +56,8 @@ fun <T> FlowContent.classesOf(statefulValue: StatefulValue<T>, classes: ClassesB
 //    }
 //}
 
-expect fun <T> FlowContent.attributeOf(name: String, statefulValue: StatefulValue<T>, value: (T) -> String)
+expect fun <T> FlowContent.attributeOf(name: String, state: State<T>, value: (T) -> String)
+expect fun <T> FlowContent.attributeOf(name: String, stream: Stream<T>, value: () -> String)
 //expect fun <T: Any?> FlowContent.attributeOf(name: String, stateFlow: StateFlow<T>, value: (T) -> String)
 //expect fun <T: Any?> FlowContent.attributeOf(name: String, flow: Flow<T>, value: () -> String)
 //expect fun <T: Any?> FlowContent.attributeOf(name: String, flow: Flow<T>, initialValue: T, value: (T) -> String)

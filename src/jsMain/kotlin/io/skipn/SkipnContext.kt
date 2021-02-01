@@ -1,22 +1,22 @@
 package io.skipn
 
 import io.skipn.builder.BuildContext
+import io.skipn.builder.DeviceFunction
 import io.skipn.html.JSDOMBuilder
+import io.skipn.observers.Scope
 import io.skipn.platform.DEV
 import io.skipn.platform.SkipnResources
 import io.skipn.utils.byId
 import kotlinx.browser.window
-import kotlinx.coroutines.*
 import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import kotlin.js.Date
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 fun FlowContent.getUnderlyingHtmlElement(): HTMLElement {
     val consumer = this.consumer as JSDOMBuilder
-    return consumer.path[consumer.path.size - 1]
+    return consumer.path[consumer.path.lastIndex]
 
 //    var d = this.consumer.asDynamic()
 //    if (d.downstream != null) {
@@ -58,20 +58,15 @@ actual class SkipnContext(route: String) : SkipnContextBase(route) {
 }
 
 
-typealias DeviceFunction = suspend CoroutineScope.() -> Unit
-
 class DeviceActionBucket (
-    val buildContext: BuildContext,
+    val scope: Scope,
     action: DeviceFunction
 ) {
-    val coroutineScope = CoroutineScope(SupervisorJob(buildContext.getCoroutineScope().coroutineContext.job))
     val actions = listOf(action)
 
-    fun launchAll() {
+    fun runAll() {
         actions.forEach {
-            coroutineScope.launch {
-                it()
-            }
+            scope.it()
         }
     }
 }
@@ -82,11 +77,11 @@ class Device {
 
     private lateinit var current: List<DeviceActionBucket>
 
-    fun runOnDesktop(context: BuildContext, action: DeviceFunction) {
-        add(context, action, desktop)
+    fun runOnDesktop(scope: Scope, action: DeviceFunction) {
+        add(scope, action, desktop)
     }
-    fun runOnMobile(context: BuildContext, action: DeviceFunction) {
-        add(context, action, mobile)
+    fun runOnMobile(scope: Scope, action: DeviceFunction) {
+        add(scope, action, mobile)
     }
 
     init {
@@ -111,39 +106,29 @@ class Device {
     private fun changeCurrent(new: List<DeviceActionBucket>) {
         // Cancel children coroutines
         current.forEach {
-            it.coroutineScope.coroutineContext.cancelChildren()
+            it.scope.disposeChildren()
         }
 
         current = new
 
         // Launch new coroutines for desktop or mobile
         new.forEach { bucket ->
-            bucket.launchAll()
+            bucket.runAll()
         }
     }
 
-    @OptIn(ExperimentalTime::class)
-    private fun add(context: BuildContext, action: DeviceFunction, target: ArrayList<DeviceActionBucket>) {
-        val targetScope = context.getCoroutineScope()
-
+    private fun add(scope: Scope, action: DeviceFunction, target: ArrayList<DeviceActionBucket>) {
         ensureRunAfterInitialization {
-            if (context.getCoroutineScope() != targetScope) return@ensureRunAfterInitialization
-
-            val bucket = DeviceActionBucket(context, action)
+            val bucket = DeviceActionBucket(scope, action)
             target.add(bucket)
 
             // Execute if current equals target
             if (current === target) {
-                bucket.launchAll()
+                bucket.runAll()
             }
 
-            // Remove if the coroutine got cancelled
-            context.launch {
-                try {
-                    delay(Duration.INFINITE)
-                } catch (e: CancellationException) {
-                    target.remove(bucket)
-                }
+            scope.onDispose {
+                target.remove(bucket)
             }
         }
     }

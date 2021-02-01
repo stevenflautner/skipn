@@ -1,6 +1,6 @@
 package io.skipn.provide
 
-import kotlinx.coroutines.flow.StateFlow
+import io.skipn.state.State
 import kotlin.reflect.KClass
 
 typealias PinMap = HashMap<KClass<*>, Any?>
@@ -77,9 +77,9 @@ class PinningContext(parent: PinningContext?) {
         bucket.pins[T::class] = instance
     }
 
-    inline fun <reified V: Any?, T: StateFlow<V>> pinStateFlow(elemId: String, stateFlow: T) {
+    inline fun <reified V: Any?, T: State<V>> pinState(elemId: String, state: T) {
         val bucket = getBucket(elemId)
-        bucket.pins[V::class] = stateFlow
+        bucket.pins[V::class] = state
     }
 
     // Should always call ascend when any tag finished

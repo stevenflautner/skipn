@@ -16,7 +16,7 @@ import kotlinx.html.FlowContent
 //    return (consumer as HTMLStreamBuilder).skipnContext
 //}
 
-internal fun FlowContent.prepareElement(): String {
+fun FlowContent.prepareElement(): String {
     val context = skipnContext
 
     val id = attributes["id"] ?: context.points.generateId().also {

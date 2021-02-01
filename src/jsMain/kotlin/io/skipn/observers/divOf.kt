@@ -5,36 +5,59 @@ import io.skipn.builder.buildContext
 import io.skipn.builder.builder
 import io.skipn.html.create
 import io.skipn.prepareElement
-import io.skipn.state.StatefulValue
+import io.skipn.state.State
+import io.skipn.state.Stream
+import io.skipn.state.observeWithin
 import kotlinx.browser.document
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import kotlinx.html.*
 import org.w3c.dom.Element
 
 @HtmlTagMarker
-actual fun <V, T> FlowContent.divOf(statefulValue: StatefulValue<V>, node: DIV.(V) -> T) {
+actual fun <V, T> FlowContent.divOf(state: State<V>, node: DIV.(V) -> T) {
     div {
         var element = prepareElement()
-        val parentScope = buildContext.getCoroutineScope()
+        val parentContext = buildContext
 
         // Creates a new Build Context
         // as a copy of the current one
         val context = builder.createContextAndDescend(element.id)
 
         // Run node first
-        node(statefulValue.value)
+        node(state.value)
 
-        val observer = statefulValue.observe { newValue ->
-            context.cancelAndCreateScope(parentScope)
-            context.getCoroutineScope().launch {
-                element = replaceElement(element, context) {
-                    node(newValue)
-                }
+        state.observeWithin(parentContext.scope) { newValue ->
+            context.scope.disposeChildren()
+
+            element = replaceElement(element, context) {
+                node(newValue)
             }
         }
     }
 }
+
+@HtmlTagMarker
+actual fun <V, T> FlowContent.divOf(stream: Stream<V>, node: DIV.() -> T) {
+    div {
+        var element = prepareElement()
+        val parentContext = buildContext
+
+        // Creates a new Build Context
+        // as a copy of the current one
+        val context = builder.createContextAndDescend(element.id)
+
+        // Run node first
+        node()
+
+        stream.observeWithin(parentContext.scope) {
+            context.scope.disposeChildren()
+
+            element = replaceElement(element, context) {
+                node()
+            }
+        }
+    }
+}
+
 //@HtmlTagMarker
 //actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T) {
 //    div {
@@ -104,7 +127,7 @@ actual fun <V, T> FlowContent.divOf(statefulValue: StatefulValue<V>, node: DIV.(
 //    }
 //}
 
-fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
+inline fun replaceElement(element: Element, context: BuildContext, crossinline node: DIV.() -> Unit): Element {
     val newElement = document.create(context).div {
         id = element.id
 

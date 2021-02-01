@@ -2,19 +2,18 @@ package io.skipn.builder
 
 import io.skipn.SkipnContext
 import io.skipn.errors.BrowserOnlyFunction
+import io.skipn.observers.Scope
 import io.skipn.provide.PinningContext
 import kotlinx.coroutines.CoroutineScope
 
 actual class BuildContext(
         id: String,
-        skipnContext: SkipnContext,
-        pinningContext: PinningContext,
-        internal var routeLevel: Int
-) : BuildContextBase(id, skipnContext, pinningContext) {
+        actual val skipnContext: SkipnContext,
+        actual val pinningContext: PinningContext,
+        internal var routeLevel: Int,
+) {
 
-    actual fun getCoroutineScope(): CoroutineScope {
-        throw BrowserOnlyFunction
-    }
+    actual val scope = Scope()
 
     companion object {
         fun createRoot(skipnContext: SkipnContext): BuildContext {
@@ -27,20 +26,13 @@ actual class BuildContext(
         }
     }
 
-    actual fun launchOnDesktop(block: suspend CoroutineScope.() -> Unit) {
+    actual fun runBrowser(block: DeviceFunction) {
         // Empty function, should have an empty body
     }
 
-    actual fun launch(block: suspend CoroutineScope.() -> Unit) {
+    actual fun runBrowserDesktop(block: DeviceFunction) {
         // Empty function, should have an empty body
     }
 
     actual fun getRouteLevel() = routeLevel
 }
-
-//actual fun <T, FLOW : Flow<T>, RES> FlowContent.stateIn(
-//    flow: FLOW,
-//    initialValue: (FLOW) -> RES
-//) {
-//    flow.stateIn(GlobalScope, SharingStarted.Eagerly, initialValue(flow))
-//}

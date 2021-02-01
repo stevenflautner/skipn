@@ -23,11 +23,13 @@ class JSDOMBuilder<out R : HTMLElement>(
     private var lastLeaved : HTMLElement? = null
 
     override val builderContextTree: ArrayDeque<BuildContext> = ArrayDeque(1)
-    override var currentBuildContext: BuildContext = rootBuildContext
+    override var currentBuildContext: BuildContext? = rootBuildContext
 
     init {
-        builderContextTree.addFirst(currentBuildContext)
+        builderContextTree.addFirst(rootBuildContext)
     }
+
+    override fun getBuildContext(): BuildContext = currentBuildContext ?: throw IllegalStateException("Build Context was null")
 
     override fun onTagStart(tag: Tag) {
         val element: HTMLElement = when {
@@ -110,7 +112,6 @@ class JSDOMBuilder<out R : HTMLElement>(
         }
     }
 
-
     override fun onTagComment(content: CharSequence) {
         if (path.isEmpty()) {
             throw IllegalStateException("No current DOM node")
@@ -119,10 +120,8 @@ class JSDOMBuilder<out R : HTMLElement>(
         path.last().appendChild(document.createComment(content.toString()))
     }
 
-    override fun finalize(): R = lastLeaved?.asR() ?: throw IllegalStateException("We can't finalize as there was no tags")
-
     @Suppress("UNCHECKED_CAST")
-    private fun HTMLElement.asR(): R = this.asDynamic()
+    override fun finalize(): R = lastLeaved as? R ?: throw IllegalStateException("We can't finalize as there was no tags")
 
 }
 

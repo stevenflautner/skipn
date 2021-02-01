@@ -2,53 +2,27 @@ package io.skipn.builder
 
 import io.skipn.SkipnContext
 import io.skipn.ensureRunAfterInitialization
+import io.skipn.observers.Scope
 import io.skipn.provide.PinningContext
-import kotlinx.coroutines.*
 
 actual class BuildContext(
-    id: String,
-    skipnContext: SkipnContext,
-    pinningContext: PinningContext,
-    private val routeLevel: Int,
-    private var coroutineScope: CoroutineScope
-) : BuildContextBase(id, skipnContext, pinningContext) {
+    val id: String,
+    actual val skipnContext: SkipnContext,
+    actual val pinningContext: PinningContext,
+    private val routeLevel: Int
+) {
 
-    actual fun getCoroutineScope(): CoroutineScope = coroutineScope
+    actual val scope = Scope()
 
-    // Launches coroutine only if the current coroutineScope did not
-    // change while the initialization process ran
     // Calls the function regularly if invoked after the initialization phase
-    actual fun launch(block: suspend CoroutineScope.() -> Unit) {
-        val targetScope = coroutineScope
+    actual fun runBrowser(block: DeviceFunction) {
         ensureRunAfterInitialization {
-            if (targetScope == coroutineScope) {
-                targetScope.launch(block = block)
-            }
+            scope.block()
         }
     }
 
-    actual fun launchOnDesktop(block: suspend CoroutineScope.() -> Unit) {
-//        val targetScope = coroutineScope
-        skipnContext.device.runOnDesktop(this, block)
-
-
-//        ensureRunAfterInitialization {
-//            if (targetScope == coroutineScope) {
-//                skipnContext.device.runOnDesktop(this) {
-//                    targetScope.launch(block = block)
-//                }
-//            }
-//        }
-    }
-
-    fun cancelAndCreateScope(parentScope: CoroutineScope) {
-        // Cancel the current coroutine context
-        // and replace it with a new one
-        coroutineScope.coroutineContext.cancelChildren()
-
-//        // Create new coroutine scope
-//        // and rebuild the child tree with it
-//        coroutineScope = CoroutineScope(SupervisorJob(parentScope.coroutineContext.job))
+    actual fun runBrowserDesktop(block: DeviceFunction) {
+        skipnContext.device.runOnDesktop(scope, block)
     }
 
     companion object {
@@ -58,7 +32,6 @@ actual class BuildContext(
                 parent.skipnContext,
                 PinningContext(parent = parent.pinningContext),
                 routeLevel,
-                CoroutineScope(SupervisorJob(parent.coroutineScope.coroutineContext.job))
             )
         }
         fun createRoot(skipnContext: SkipnContext): BuildContext {
@@ -67,7 +40,6 @@ actual class BuildContext(
                 skipnContext,
                 PinningContext(parent = null),
                 0,
-                CoroutineScope(SupervisorJob())
             )
         }
     }

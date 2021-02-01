@@ -1,16 +1,26 @@
 package io.skipn.observers
 
 import io.skipn.prepareElement
-import io.skipn.state.StatefulValue
+import io.skipn.state.State
+import io.skipn.state.Stream
 import kotlinx.html.FlowContent
 
 actual fun <T> FlowContent.attributeOf(
     name: String,
-    statefulValue: StatefulValue<T>,
+    state: State<T>,
     value: (T) -> String
 ) {
     prepareElement()
-    attributes[name] = value(statefulValue.value)
+    attributes[name] = value(state.value)
+}
+
+actual fun <T> FlowContent.attributeOf(
+    name: String,
+    stream: Stream<T>,
+    value: () -> String
+) {
+    prepareElement()
+    attributes[name] = value()
 }
 
 //actual fun <T> FlowContent.attributeOf(

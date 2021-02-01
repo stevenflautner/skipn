@@ -2,7 +2,8 @@ package io.skipn.form
 
 import io.skipn.FileData
 import io.skipn.FormEndpoint
-import io.skipn.builder.launch
+import io.skipn.builder.observe
+import io.skipn.builder.runBrowser
 import io.skipn.elements.DomElement
 import io.skipn.events.*
 import io.skipn.form.InputField.Companion.convertType
@@ -11,10 +12,9 @@ import io.skipn.observers.classesOf
 import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
+import io.skipn.state.MutableState
+import io.skipn.state.stateOf
+import io.skipn.utils.launchBrowser
 import kotlinx.datetime.LocalDateTime
 import kotlinx.html.*
 import kotlin.reflect.KProperty
@@ -34,10 +34,10 @@ class ValueField<T: Any?>(
 }
 
 class InputField<T: Any?>(
-        val name: String,
-        var required: Boolean,
-        val valueAttr: MutableStateFlow<T?>,
-        val error: MutableStateFlow<String?>,
+    val name: String,
+    var required: Boolean,
+    val valueAttr: MutableState<T?>,
+    val error: MutableState<String?>,
 ) : FormField<T>() {
 
     var touched = false
@@ -56,8 +56,8 @@ class InputField<T: Any?>(
             return InputField(
                     property.name,
                     required,
-                    MutableStateFlow(null),
-                    MutableStateFlow(null),
+                    MutableState(null),
+                    MutableState(null),
             )
         }
 
@@ -92,7 +92,7 @@ class InputField<T: Any?>(
 class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
 
     val inputs = hashMapOf<String, FormField<*>>()
-    val _error = MutableStateFlow<String?>(null)
+    val _error = stateOf<String?>(null)
     val validators = arrayListOf<FormValidatorFunc>()
 
     fun addInput(input: InputField<*>) {
@@ -240,7 +240,7 @@ class FormBuilder<RESP: Any>(val elem: FORM, val state: FormState<RESP>) {
     fun FlowContent.Submit(text: String) {
         button(classes = "mx-3 p-2 rounded bg-green-400 hover:bg-green-500 shadow-lg") {
             onClick {
-                launch {
+                launchBrowser {
                     submitDefault()
                 }
             }
@@ -298,9 +298,9 @@ class InputValidator(val inputs: Map<String, Any?>) {
 }
 
 inline fun <reified RESP: Any> FlowContent.Form(
-        endpoint: FormEndpoint<*, RESP>,
-        noinline validator: FormValidatorFunc? = null,
-        crossinline body: FormBuilder<RESP>.() -> Unit,
+    endpoint: FormEndpoint<*, RESP>,
+    noinline validator: FormValidatorFunc? = null,
+    crossinline body: FormBuilder<RESP>.() -> Unit,
 ) = Form(
     FormState(endpoint).apply {
         validator?.let {
@@ -311,8 +311,8 @@ inline fun <reified RESP: Any> FlowContent.Form(
 )
 
 inline fun <reified RESP: Any> FlowContent.Form(
-        state: FormState<RESP>,
-        crossinline body: FormBuilder<RESP>.() -> Unit,
+    state: FormState<RESP>,
+    crossinline body: FormBuilder<RESP>.() -> Unit,
 ) {
     form(classes = "w-full mx-auto", method = FormMethod.post, encType = FormEncType.multipartFormData) {
         preventDefaultSubmit()
@@ -332,6 +332,15 @@ inline fun <reified RESP: Any> FlowContent.Form(
     }
 }
 
+fun FlowContent.touchAndValidate(state: FormState<*>, input: InputField<*>) {
+    runBrowser {
+        observe(input.valueAttr) {
+            input.touch()
+            state.validateTouched()
+        }
+    }
+}
+
 inline fun <reified T: Any?> FlowContent.InputComp(
     input: InputField<T>,
     label: String,
@@ -342,12 +351,7 @@ inline fun <reified T: Any?> FlowContent.InputComp(
 ) {
     val state: FormState<*> = locate()
 
-    launch {
-        input.valueAttr.drop(1).collectLatest {
-            input.touch()
-            state.validateTouched()
-        }
-    }
+    touchAndValidate(state, input)
 
     div("w-full px-3 mb-6 $wrapperClasses") {
         label("block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") {
@@ -395,12 +399,7 @@ fun FlowContent.CheckBoxComp(
 ) {
     val state: FormState<*> = locate()
 
-    launch {
-        input.valueAttr.drop(1).collectLatest {
-            input.touch()
-            state.validateTouched()
-        }
-    }
+    touchAndValidate(state, input)
 
     div("flex items-start") {
         if (text != null) {

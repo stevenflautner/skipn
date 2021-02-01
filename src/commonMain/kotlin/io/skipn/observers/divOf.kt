@@ -3,11 +3,8 @@
 
 package io.skipn.observers
 
-import io.skipn.state.StatefulValue
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import io.skipn.state.State
+import io.skipn.state.Stream
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker
@@ -15,7 +12,9 @@ import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 @HtmlTagMarker
-expect fun <V: Any?, T> FlowContent.divOf(statefulValue: StatefulValue<V>, node: DIV.(V) -> T)
+expect fun <V, T> FlowContent.divOf(state: State<V>, node: DIV.(V) -> T)
+@HtmlTagMarker
+expect fun <V, T> FlowContent.divOf(stream: Stream<V>, node: DIV.() -> T)
 
 //@HtmlTagMarker
 //expect fun FlowContent.divOf(flow: Flow<*>, node: DIV.() -> Unit)

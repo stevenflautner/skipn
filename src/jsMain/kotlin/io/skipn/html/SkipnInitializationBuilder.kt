@@ -12,11 +12,13 @@ class SkipnInitializationBuilder(
 ) : TagConsumer<Unit>, Builder {
 
     override val builderContextTree: ArrayDeque<BuildContext> = ArrayDeque(1)
-    override var currentBuildContext: BuildContext = rootBuildContext
+    override var currentBuildContext: BuildContext? = rootBuildContext
 
     init {
         builderContextTree.addFirst(rootBuildContext)
     }
+
+    override fun getBuildContext(): BuildContext = currentBuildContext ?: throw IllegalStateException("Build Context was null")
 
     override fun onTagStart(tag: Tag) {}
 

@@ -20,7 +20,7 @@ actual val FlowContent.builder: Builder
 actual interface Builder {
 
     actual val rootBuildContext: BuildContext
-    actual var currentBuildContext: BuildContext
+    actual var currentBuildContext: BuildContext?
 
     val routerTree: ArrayDeque<String>
 
@@ -34,5 +34,7 @@ actual interface Builder {
         rootBuildContext.routeLevel--
         routerTree.removeLast()
     }
+
+    actual fun getBuildContext(): BuildContext
 
 }

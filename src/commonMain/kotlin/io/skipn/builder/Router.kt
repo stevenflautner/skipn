@@ -3,129 +3,25 @@
 
 package io.skipn.builder
 
-import io.ktor.http.*
 import io.skipn.actions.updateUrlParameter
 import io.skipn.skipnContext
-import io.skipn.state.StatefulValue
-import io.skipn.utils.mutableStateFlowOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.*
+import io.skipn.state.*
 import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 import kotlin.math.max
 
-class Router(fullRoute: String) {
+abstract class RouterBase(fullRoute: String) {
+    protected var route = ParsedRoute(fullRoute)
 
-    private var routeArray: List<String>
-    private var parameters: Parameters
+    val stream = streamOf<Change>()
 
-    init {
-        val url = URLBuilder(fullRoute)
-        routeArray = parseRoute(url.encodedPath)
-        parameters = url.parameters.build()
-    }
-
-    fun routeFor(level: Int) = routeArray.getOrNull(level)?.let {
+    fun routeFor(level: Int) = route.routeValues.getOrNull(level)?.let {
         if (it == "/") null
         else it
     }
 
-    fun getParameterValue(key: String) = parameters[key]
-
-    val stream = MutableSharedFlow<Change>(extraBufferCapacity = 2)
-
-    private fun parseRoute(_fullRoute: String): List<String> {
-        val fullRoute = _fullRoute.removePrefix("/")
-        val count = fullRoute.count { it == '/' }
-
-        return if (count == 0) {
-            listOf(fullRoute)
-        } else {
-            fullRoute.split("/")
-        }
-    }
-
-    fun changeParameter(key: String, newValue: Any?) {
-        val parametersBuilder = ParametersBuilder().apply {
-            parameters.forEach { s, list ->
-                appendAll(s, list)
-            }
-        }
-
-        if (newValue == null) {
-            parametersBuilder.remove(key)
-        } else {
-            parametersBuilder[key] = newValue.toString()
-        }
-
-        val newParameters = parametersBuilder.build().also {
-            parameters = it
-        }
-
-        updateUrlParameter(newParameters.formUrlEncode())
-        stream.tryEmit(ParameterChange(key, newValue?.toString()))
-    }
-
-    fun changeRoute(urlPath: String) {
-        val url = URLBuilder(urlPath)
-        updateRoute(url)
-        updateParameters(url)
-    }
-
-    private fun updateRoute(url: URLBuilder) {
-        val oldRouteArray = routeArray
-        val newRouteArray = parseRoute(url.encodedPath).also {
-            routeArray = it
-        }
-
-        // Update route differences
-        var foundRouteDifference = false
-
-        for (i in 0 until max(oldRouteArray.size, newRouteArray.size)) {
-            val oldRoute = oldRouteArray.getOrNull(i)
-            val newRoute = newRouteArray.getOrNull(i)
-
-            if (oldRoute != newRoute) {
-                stream.tryEmit(RouteChange(i, newRoute))
-                foundRouteDifference = true
-                break
-            }
-        }
-
-        // If the two are identical up until the size of the new array,
-        // then check if they are of the same size. If not, then there was a change of route
-        if (!foundRouteDifference && oldRouteArray.size != newRouteArray.size) {
-            stream.tryEmit(RouteChange(newRouteArray.lastIndex, newRouteArray.last()))
-        }
-    }
-
-    private fun updateParameters(url: URLBuilder) {
-        val oldParameters = parameters
-
-        val newParameters = url.parameters.build().also {
-            parameters = it
-        }
-
-        val oldEntries = oldParameters.entries()
-        val newEntries = newParameters.entries()
-
-        val allEntries = (oldEntries + newEntries).distinct()
-
-        allEntries.forEach {
-            val oldValue = oldParameters[it.key]
-            val newValue = newParameters[it.key]
-
-            if (oldValue != newValue) {
-                stream.tryEmit(ParameterChange(it.key, newValue))
-            }
-        }
-
-        val a = mutableStateFlowOf(12)
-        a.asStateFlow().value
-
-    }
+    fun getParameterValue(key: String) = route.parameters[key]
 
     fun filterRouteChangesFor(level: Int) =
         stream.filterIsInstance<RouteChange>().filter { it.level == level }.map { it.route }
@@ -134,11 +30,97 @@ class Router(fullRoute: String) {
         .filter { it.key == key }
         .map { it.value }
 
-    fun parameter(key: String, scope: CoroutineScope) = stream.filterIsInstance<ParameterChange>()
+    fun parameter(key: String, context: BuildContext) = stream.filterIsInstance<ParameterChange>()
         .filter { it.key == key }
         .map { it.value }
-        .stateIn(scope, SharingStarted.Eagerly, getParameterValue(key))
+        .toState(getParameterValue(key)).attach(context)
 }
+
+expect class Router(fullRoute: String) : RouterBase {
+    fun changeParameter(key: String, newValue: Any?)
+
+    fun changeRoute(fullRoute: String)
+
+    fun updateRoute(newRouteValues: List<String>)
+
+    fun updateParameters(newParameters: Parameters)
+}
+//
+//class Router(fullRoute: String) {
+//
+//    private var route = ParsedRoute(fullRoute)
+//
+//    fun routeFor(level: Int) = route.routeValues.getOrNull(level)?.let {
+//        if (it == "/") null
+//        else it
+//    }
+//
+//    fun getParameterValue(key: String) = route.parameters[key]
+//
+//    val stream = streamOf<Change>()
+//
+//    fun changeParameter(key: String, newValue: Any?) {
+//        if (newValue == null) {
+//            route.parameters.remove(key)
+//        } else {
+//            route.parameters[key] = newValue.toString()
+//        }
+//
+//        updateUrlParameter(route.parameters.formUrlEncode())
+//        stream.emit(ParameterChange(key, newValue?.toString()))
+//    }
+//
+//    fun changeRoute(fullRoute: String) {
+//        route = ParsedRoute(fullRoute).apply {
+//            updateRoute(routeValues)
+//            updateParameters(parameters)
+//        }
+//    }
+//
+//    private fun updateRoute(newRouteValues: List<String>) {
+//        val oldRouteValues = route.routeValues
+//
+//        // Update route differences
+//        var foundRouteDifference = false
+//
+//        for (i in 0 until max(oldRouteValues.size, newRouteValues.size)) {
+//            val oldRoute = oldRouteValues.getOrNull(i)
+//            val newRoute = newRouteValues.getOrNull(i)
+//
+//            if (oldRoute != newRoute) {
+//                stream.emit(RouteChange(i, newRoute))
+//                foundRouteDifference = true
+//                break
+//            }
+//        }
+//
+//        // If the two are identical up until the size of the new array,
+//        // then check if they are of the same size. If not, then there was a change of route
+//        if (!foundRouteDifference && oldRouteValues.size != newRouteValues.size) {
+//            stream.emit(RouteChange(newRouteValues.lastIndex, newRouteValues.last()))
+//        }
+//    }
+//
+//    private fun updateParameters(newParameters: Parameters) {
+//        val oldParameters = route.parameters
+//
+//        val oldEntries = oldParameters.entries
+//        val newEntries = newParameters.entries
+//
+//        val allEntries = (oldEntries + newEntries).distinct()
+//
+//        allEntries.forEach {
+//            val oldValue = oldParameters[it.key]
+//            val newValue = newParameters[it.key]
+//
+//            if (oldValue != newValue) {
+//                stream.emit(ParameterChange(it.key, newValue))
+//            }
+//        }
+//    }
+//
+//
+//}
 
 interface Change
 class RouteChange(val level: Int, val route: String?) : Change
@@ -147,9 +129,11 @@ class ParameterChange(val key: String, val value: String?) : Change
 val FlowContent.router: Router
     get() = skipnContext.router
 
-val BuildContext.currentRoute: StateFlow<String?>
-    get() = skipnContext.router.filterRouteChangesFor(getRouteLevel()).stateIn(GlobalScope, SharingStarted.Lazily, skipnContext.router.routeFor(getRouteLevel()))
+val BuildContext.currentRoute: State<String?>
+    get() = skipnContext.router.filterRouteChangesFor(getRouteLevel())
+        .toState(skipnContext.router.routeFor(getRouteLevel()))
+        .attach(this)
 
-fun BuildContext.parameter(key: String) = skipnContext.router.parameter(key, getCoroutineScope())
+fun BuildContext.parameter(key: String) = skipnContext.router.parameter(key, this)
 
-val FlowContent.currentRoute: StateFlow<String?> get() = buildContext.currentRoute
+val FlowContent.currentRoute: State<String?> get() = buildContext.currentRoute

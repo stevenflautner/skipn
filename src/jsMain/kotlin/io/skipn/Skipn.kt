@@ -1,7 +1,5 @@
 package io.skipn
 
-import io.ktor.client.call.*
-import io.ktor.client.statement.*
 import io.skipn.actions.routePage
 import io.skipn.utils.byId
 import kotlinx.html.*

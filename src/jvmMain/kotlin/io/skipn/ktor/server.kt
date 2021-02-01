@@ -19,6 +19,7 @@ fun Application.Skipn(
         endpoints: Routing.() -> Unit,
         errorFilter: ErrorFilter? = null
 ) {
+
     install(ContentNegotiation) {
         json(buildApiJson())
 //        json()
