@@ -3,7 +3,6 @@
 
 package io.skipn.observers
 
-import io.skipn.notifiers.StatefulValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow

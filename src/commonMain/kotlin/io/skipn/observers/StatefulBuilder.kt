@@ -1,7 +1,5 @@
 package io.skipn.observers
 
-import io.skipn.notifiers.Stateful
-import io.skipn.notifiers.StatefulValue
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker

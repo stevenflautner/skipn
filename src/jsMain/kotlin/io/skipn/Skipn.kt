@@ -79,7 +79,7 @@ object Skipn {
     }
 }
 
-internal fun ensureRunAfterInitialization(body: () -> Unit) {
+fun ensureRunAfterInitialization(body: () -> Unit) {
     if (Skipn.context.isInitializing) {
         Skipn.runAfterInitialized!!.add(body)
         return

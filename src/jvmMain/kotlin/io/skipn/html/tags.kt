@@ -27,3 +27,20 @@ actual fun HEAD.skipnHead() {
     meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
     link { rel = "stylesheet"; type="text/css"; href = "/public/${Skipn.buildHash}.css" }
 }
+
+/**
+ * Scripts are not included in the server prerender.
+ * If you add a script to the Head, it will be appended
+ * to the DOM's head once the framework has initialized,
+ * therefore it will load afterwards.
+ *
+ * Server ignores the script tag defined
+ */
+@HtmlTagMarker
+actual inline fun FlowContent.script(
+    type: String?,
+    src: String?,
+    crossinline block: SCRIPT.() -> Unit
+) {
+    // Empty function should not have a body
+}

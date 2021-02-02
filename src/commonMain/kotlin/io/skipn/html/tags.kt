@@ -69,3 +69,14 @@ fun FlowContent.Link(href: String?, classes: String? = null, body: DomElement? =
         body?.invoke(this)
     }
 }
+
+/**
+ * Scripts are not included in the server prerender.
+ * If you add a script to the Head, it will be appended
+ * to the DOM's head once the framework has initialized,
+ * therefore scripts will load afterwards.
+ *
+ * Server ignores the script tag defined
+ */
+@HtmlTagMarker
+expect inline fun FlowContent.script(type : String? = null, src : String? = null, crossinline block : SCRIPT.() -> Unit = {})
