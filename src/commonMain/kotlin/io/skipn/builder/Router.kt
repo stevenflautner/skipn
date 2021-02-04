@@ -111,7 +111,7 @@ class Router(fullRoute: String) {
         val oldEntries = oldParameters.entries()
         val newEntries = newParameters.entries()
 
-        val allEntries = (oldEntries + newEntries).distinct()
+        val allEntries = (oldEntries + newEntries).distinctBy { it.key }
 
         allEntries.forEach {
             val oldValue = oldParameters[it.key]
@@ -121,10 +121,6 @@ class Router(fullRoute: String) {
                 stream.tryEmit(ParameterChange(it.key, newValue))
             }
         }
-
-        val a = mutableStateFlowOf(12)
-        a.asStateFlow().value
-
     }
 
     fun filterRouteChangesFor(level: Int) =
