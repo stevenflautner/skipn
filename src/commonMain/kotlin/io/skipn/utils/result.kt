@@ -1,10 +1,7 @@
 package io.skipn.utils
 
-import io.skipn.state.State
-import io.skipn.state.filter
-import io.skipn.state.filterNotNull
-import io.skipn.state.stateOf
+import io.skipn.state.*
 
 fun <T: Any?> result() = stateOf<Result<T>?>(null)
 
-fun <T: Any> State<Result<T>?>.onSuccess() = filterNotNull().filter { it.isSuccess }
+fun <T: Any> State<Result<T>?>.onSuccess() = filter { it != null && it.isSuccess }

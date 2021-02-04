@@ -1,19 +1,15 @@
 package io.skipn.observers
 
 class Scope {
-    var childBuilderContexts: ArrayList<Scope>? = null
-    private var onDisposeListeners: ArrayList<() -> Unit>? = null
+    var children: ArrayList<Scope>? = null
+    private var disposeListeners: ArrayList<() -> Unit>? = null
     private lateinit var parent: Scope
 
     private fun addChild(scope: Scope) {
-        val children = childBuilderContexts ?: arrayListOf<Scope>().also {
-            this.childBuilderContexts = it
+        val children = children ?: arrayListOf<Scope>().also {
+            this.children = it
         }
         children.add(scope)
-    }
-
-    private fun detach() {
-        parent.childBuilderContexts?.remove(this)
     }
 
     fun attach(parent: Scope) {
@@ -23,24 +19,29 @@ class Scope {
 
     fun disposeChildren() {
         notifyDisposeListeners()
-        childBuilderContexts?.forEach {
-            it.detach()
-            it.disposeChildren()
+        children?.let { children ->
+            children.forEach {
+                it.disposeChildren()
+            }
+            children.clear()
+            this.children = null
         }
-        childBuilderContexts = null
     }
 
     private fun notifyDisposeListeners() {
-        onDisposeListeners?.forEach {
-            it()
+        disposeListeners?.let { disposeListeners ->
+            disposeListeners.forEach {
+                it()
+            }
+            disposeListeners.clear()
+            this.disposeListeners = null
         }
-        onDisposeListeners = null
     }
 
     fun onDispose(onDispose: () -> Unit) {
-        val onDisposeListeners = onDisposeListeners ?: arrayListOf<() -> Unit>().also {
-            this.onDisposeListeners = it
+        val disposeListeners = disposeListeners ?: arrayListOf<() -> Unit>().also {
+            this.disposeListeners = it
         }
-        onDisposeListeners.add(onDispose)
+        disposeListeners.add(onDispose)
     }
 }

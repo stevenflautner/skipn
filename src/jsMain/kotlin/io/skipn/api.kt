@@ -30,7 +30,13 @@ object Api {
                 headers = json().let { headersJson ->
                     // Required so that if we get a 'Set-Cookie' header in the
                     // response it is applied to the browser
-                    headersJson["credentials"] = "same-origin"
+//                    headersJson["credentials"] = "same-origin"
+
+                    // Preflight request fails without origin header
+                    // in dev mode
+//                    if (DEV) {
+//                        headersJson["Origin"] = "http://localhost:8080"
+//                    }
 
                     // Send the required cookies to the server
                     endpoint.getCookieString()?.let {

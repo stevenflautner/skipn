@@ -17,15 +17,15 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
     }
 
     actual fun changeRoute(fullRoute: String) {
-        route = ParsedRoute(fullRoute).apply {
-            updateRoute(routeValues)
-            updateParameters(parameters)
-        }
+        val oldRoute = route
+        val newRoute = ParsedRoute(fullRoute)
+        route = newRoute
+
+        updateRoute(oldRoute.routeValues, newRoute.routeValues)
+        updateParameters(oldRoute.parameters, newRoute.parameters)
     }
 
-    actual fun updateRoute(newRouteValues: List<String>) {
-        val oldRouteValues = route.routeValues
-
+    actual fun updateRoute(oldRouteValues: List<String>, newRouteValues: List<String>) {
         // Update route differences
         var foundRouteDifference = false
 
@@ -47,13 +47,11 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
         }
     }
 
-    actual fun updateParameters(newParameters: Parameters) {
-        val oldParameters = route.parameters
-
+    actual fun updateParameters(oldParameters: Parameters, newParameters: Parameters) {
         val oldEntries = oldParameters.entries
         val newEntries = newParameters.entries
 
-        val allEntries = (oldEntries + newEntries).distinct()
+        val allEntries = (oldEntries + newEntries).distinctBy { it.key }
 
         allEntries.forEach {
             val oldValue = oldParameters[it.key]

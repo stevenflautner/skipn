@@ -3,6 +3,7 @@ package io.skipn.observers
 import io.skipn.builder.buildContext
 import io.skipn.builder.currentRoute
 import io.skipn.builder.parameter
+import io.skipn.state.attach
 import kotlinx.html.DIV
 import kotlinx.html.FlowContent
 import kotlinx.html.HtmlTagMarker

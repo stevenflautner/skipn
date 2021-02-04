@@ -6,11 +6,12 @@ expect fun String.encodeURLParameter(): String
 
 fun Parameters.formUrlEncode(): String {
     return StringBuilder().apply {
-        entries.forEach {
-            val key = it.key.encodeURLParameter()
-            val value = it.value.encodeURLParameter()
+        entries.forEachIndexed { index, entry ->
+            val key = entry.key.encodeURLParameter()
+            val value = entry.value.encodeURLParameter()
 
-            append("&$key=$value")
+            if (index > 0) append('&')
+            append("$key=$value")
         }
     }.toString()
 }
@@ -38,7 +39,9 @@ class ParsedRoute(raw: String) {
     }
 
     private fun parseRoute(split: List<String>): List<String> {
-        val fullRoute = split[0].removePrefix("/")
+        var routePart = split[0]
+
+        val fullRoute = routePart.removePrefix("/")
         val count = fullRoute.count { it == '/' }
 
         return if (count == 0) {

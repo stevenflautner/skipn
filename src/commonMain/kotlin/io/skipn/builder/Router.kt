@@ -3,13 +3,11 @@
 
 package io.skipn.builder
 
-import io.skipn.actions.updateUrlParameter
 import io.skipn.skipnContext
 import io.skipn.state.*
 import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
-import kotlin.math.max
 
 abstract class RouterBase(fullRoute: String) {
     protected var route = ParsedRoute(fullRoute)
@@ -33,7 +31,7 @@ abstract class RouterBase(fullRoute: String) {
     fun parameter(key: String, context: BuildContext) = stream.filterIsInstance<ParameterChange>()
         .filter { it.key == key }
         .map { it.value }
-        .toState(getParameterValue(key)).attach(context)
+        .toState(getParameterValue(key))
 }
 
 expect class Router(fullRoute: String) : RouterBase {
@@ -41,9 +39,9 @@ expect class Router(fullRoute: String) : RouterBase {
 
     fun changeRoute(fullRoute: String)
 
-    fun updateRoute(newRouteValues: List<String>)
+    fun updateRoute(oldRouteValues: List<String>, newRouteValues: List<String>)
 
-    fun updateParameters(newParameters: Parameters)
+    fun updateParameters(oldParameters: Parameters, newParameters: Parameters)
 }
 //
 //class Router(fullRoute: String) {
@@ -132,7 +130,6 @@ val FlowContent.router: Router
 val BuildContext.currentRoute: State<String?>
     get() = skipnContext.router.filterRouteChangesFor(getRouteLevel())
         .toState(skipnContext.router.routeFor(getRouteLevel()))
-        .attach(this)
 
 fun BuildContext.parameter(key: String) = skipnContext.router.parameter(key, this)
 

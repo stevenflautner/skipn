@@ -1,6 +1,5 @@
 package io.skipn
 
-import io.skipn.builder.BuildContext
 import io.skipn.builder.DeviceFunction
 import io.skipn.html.JSDOMBuilder
 import io.skipn.observers.Scope
@@ -12,11 +11,10 @@ import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import kotlin.js.Date
-import kotlin.time.ExperimentalTime
 
 fun FlowContent.getUnderlyingHtmlElement(): HTMLElement {
     val consumer = this.consumer as JSDOMBuilder
-    return consumer.path[consumer.path.lastIndex]
+    return consumer.path.last()
 
 //    var d = this.consumer.asDynamic()
 //    if (d.downstream != null) {
@@ -137,7 +135,9 @@ class Device {
 inline fun createSkipnContext(body: (SkipnContext) -> Unit): SkipnContext {
     val ct = Date().getMilliseconds()
 
-    return SkipnContext(window.location.href).apply {
+    val route = "${window.location.pathname}${window.location.search}"
+
+    return SkipnContext(route).apply {
         body(this)
         isInitializing = false
         if (DEV) {

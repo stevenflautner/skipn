@@ -62,7 +62,8 @@ actual interface Builder {
         // Current builder ended should ascend the build context
         // Leave the root in the context tree
 //        if (getBuildContext().id == elemId) {
-        if (currentBuildContext?.id == elemId && builderContextTree.size > 1) {
+        if (currentBuildContext?.id == elemId) {
+//        if (currentBuildContext?.id == elemId && builderContextTree.size > 1) {
             // In DEV mode the root #skipn-app div ascends
             // therefore we should no longer advance to the body & html tags
             // So leave root build context as current

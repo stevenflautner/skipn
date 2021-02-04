@@ -5,37 +5,91 @@ import io.skipn.observers.Scope
 
 interface Stream<T> {
 
+    val lastEmitted: T
+    val cacheLast: Boolean
+
     fun observe(observer: Observer<T>): Observer<T>
+    fun collect(observer: Observer<T>): Observer<T>
 
     fun removeObserver(observer: Observer<T>)
 
     fun emit(value: T)
 
+    val isCachingAndSet: Boolean
+
 }
 
 fun <T> Stream<T>.observeWithin(scope: Scope, observer: Observer<T>): Observer<T> {
-    observe(observer)
     scope.onDispose {
         removeObserver(observer)
     }
+    observe(observer)
     return observer
 }
 
-open class MutableStream<T>: Stream<T> {
+class CHECK
 
-    protected val observers = mutableListOf<Observer<T>>()
+private val NOT_SET = CHECK()
+
+open class MutableStream<T>(
+    override val cacheLast: Boolean = false,
+): Stream<T> {
+
+    val observers = mutableListOf<Observer<T>>()
+
+    private var lastEmittedValue: Any? = NOT_SET
+
+    override val lastEmitted: T
+        get() = lastEmittedValue as T
+
+    private var sharing: Sharing? = null
+
+    override val isCachingAndSet: Boolean
+            get() = cacheLast && lastEmittedValue !== NOT_SET
+
+    class Sharing(
+        val start: () -> Unit,
+        val stop: () -> Unit
+    )
+
+    fun setupObservation(start: () -> Unit, stop: () -> Unit) {
+        sharing = Sharing(start, stop)
+    }
 
     override fun observe(observer: Observer<T>): Observer<T> {
-        return observer.also {
-            observers += observer
+        observers += observer
+        if (observers.size == 1)
+            sharing?.start?.invoke()
+        return observer
+    }
+
+    override fun collect(observer: Observer<T>): Observer<T> {
+        observe(observer)
+        if (isCachingAndSet) {
+            observer(lastEmitted)
         }
+        return observer
     }
 
     override fun removeObserver(observer: Observer<T>) {
         observers -= observer
+        if (observers.size == 0)
+            sharing?.stop?.invoke()
     }
 
     override fun emit(value: T) {
+        // Equality check
+        val lastEmittedValue = lastEmittedValue
+        if (cacheLast) {
+            this.lastEmittedValue = value
+        }
+        println("NEW VALUE")
+        println(value)
+        println(lastEmittedValue)
+        println(value == lastEmittedValue)
+        println(value === lastEmittedValue)
+        if (value == lastEmittedValue)
+            return
         observers.forEach {
             it(value)
         }
@@ -44,104 +98,121 @@ open class MutableStream<T>: Stream<T> {
     fun asStream() = this as Stream<T>
 }
 
-interface Disposable {
-    val dispose: () -> Unit
-}
-
 open class DisposableStream<T>(stream: MutableStream<T>, val dispose: () -> Unit): Stream<T> by stream
 
 class DisposableState<T>(state: MutableState<T>, dispose: () -> Unit): DisposableStream<T>(state, dispose), State<T> {
     override val value = state.value
 }
 
-inline fun <T> Stream<T>.filter(crossinline predicate: (T) -> Boolean): DisposableStream<T> = transform { value ->
+inline fun <T> Stream<T>.filter(crossinline predicate: (T) -> Boolean): Stream<T> = transform { value ->
     if (predicate(value))
         return@transform emit(value)
 }
 
-inline fun <T, R> Stream<T>.transform(crossinline transform: Stream<R>.(value: T) -> Unit): DisposableStream<R> {
-    val stream = streamOf<R>()
-    val observer = observe {
-        stream.transform(it)
+inline fun <T, R> Stream<T>.transform(crossinline transform: Stream<R>.(value: T) -> Unit): Stream<R> {
+    val stream = streamOf<R>(cacheLast)
+
+    var observer: Observer<T>? = null
+    stream.setupObservation(
+        start = {
+            observer = observe {
+                stream.transform(it)
+            }
+        },
+        stop = {
+            observer?.let {
+                removeObserver(it)
+                observer = null
+            }
+        }
+    )
+
+    if (isCachingAndSet) {
+        stream.transform(lastEmitted)
     }
-    return DisposableStream(stream) {
-        removeObserver(observer)
-    }
+
+    return stream
 }
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified R> Stream<*>.filterIsInstance(): DisposableStream<R> = filter { it is R } as DisposableStream<R>
+inline fun <reified R> Stream<*>.filterIsInstance(): Stream<R> = filter { it is R } as Stream<R>
 
 fun <T: Any> Stream<T?>.filterNotNull(): Stream<T> = transform { value ->
     if (value != null) return@transform emit(value)
 }
 
-inline fun <T, R> Stream<T>.map(crossinline transform: (value: T) -> R): DisposableStream<R> = transform { value ->
+inline fun <T, R> Stream<T>.map(crossinline transform: (value: T) -> R): Stream<R> = transform { value ->
     return@transform emit(transform(value))
 }
 
-internal class CONSTANT(val name: String) {
-    override fun toString(): String = name
-}
+fun <T1, T2, T> Stream<T1>.combine(secondStream: Stream<T2>, transform: (T1, T2) -> T): Stream<T> {
+    val combined = streamOf<T>(true)
 
-//private val NOT_YET_RECEIVED = CONSTANT("NOT_YET_RECEIVED")
+    var firstValue: Any? = NOT_SET
+    var secondValue: Any? = NOT_SET
 
-fun <T1, T2, T> Stream<T1>.combine(secondStream: Stream<T2>, transform: (T1, T2) -> T): DisposableStream<T> {
-    val combined = streamOf<T>()
-
-    var firstValue: T1? = null
-    var secondValue: T2? = null
-
-    var firstValueReceived = false
-    var secondValueReceived = false
-
-    if (this is State<T1>) {
-        firstValue = this.value
-        firstValueReceived = true
+    if (this.isCachingAndSet) {
+        firstValue = lastEmitted
     }
-    if (secondStream is State<T2>) {
-        secondValue = secondStream.value
-        secondValueReceived = true
+    if (secondStream.isCachingAndSet) {
+        secondValue = secondStream.lastEmitted
     }
 
     fun tryEmit() {
-        if (firstValueReceived && secondValueReceived)
-            combined.emit(transform(firstValue!!, secondValue!!))
+        if (firstValue !== NOT_SET && secondValue !== NOT_SET) {
+            combined.emit(transform(firstValue as T1, secondValue as T2))
+        }
     }
 
-    val firstObserver = observe {
-        firstValue = it
-        tryEmit()
-    }
-    val secondObserver = secondStream.observe {
-        secondValue = it
-        tryEmit()
-    }
+    var firstObserver: Observer<T1>? = null
+    var secondObserver: Observer<T2>? = null
+
+    combined.setupObservation(
+        start = {
+            firstObserver = observe {
+                firstValue = it
+                tryEmit()
+            }
+            secondObserver = secondStream.observe {
+                secondValue = it
+                tryEmit()
+            }
+        },
+        stop = {
+            firstObserver?.let {
+                removeObserver(it)
+                firstObserver = null
+            }
+            secondObserver?.let {
+                secondStream.removeObserver(it)
+                secondObserver = null
+            }
+        }
+    )
 
     tryEmit()
 
-    return DisposableStream(combined) {
-        removeObserver(firstObserver)
-        secondStream.removeObserver(secondObserver)
-    }
+    return combined
 }
 
-fun <T> Stream<T>.toState(default: T): DisposableState<T> {
+fun <T> Stream<T>.toState(default: T): State<T> {
     val state = stateOf(default)
-    val observer = observe {
-        state.value = it
-    }
-    return DisposableState(state) {
-        removeObserver(observer)
-    }
+    var observer: Observer<T>? = null
+    state.setupObservation(
+        start = {
+            observer = observe {
+                state.value = it
+            }
+        },
+        stop = {
+            observer?.let {
+                removeObserver(it)
+                observer = null
+            }
+        }
+    )
+    return state
 }
-
-//fun <T> DisposableState<T>.attach(scope: Scope): DisposableState<T> {
-//    scope.onDispose {
-//        dispose()
-//    }
-//    return this
-//}
 
 fun <V: DisposableStream<T>, T> V.attach(scope: Scope): V {
     scope.onDispose {

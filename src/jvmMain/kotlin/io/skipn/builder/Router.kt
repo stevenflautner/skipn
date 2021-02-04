@@ -12,11 +12,11 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
         throw BrowserOnlyFunction
     }
 
-    actual fun updateRoute(newRouteValues: List<String>) {
+    actual fun updateRoute(oldRouteValues: List<String>, newRouteValues: List<String>) {
         throw BrowserOnlyFunction
     }
 
-    actual fun updateParameters(newParameters: Parameters) {
+    actual fun updateParameters(oldParameters: Parameters, newParameters: Parameters) {
         throw BrowserOnlyFunction
     }
 }

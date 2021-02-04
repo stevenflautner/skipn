@@ -13,6 +13,7 @@ import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
 import io.skipn.state.MutableState
+import io.skipn.state.observeWithin
 import io.skipn.state.stateOf
 import io.skipn.utils.launchBrowser
 import kotlinx.datetime.LocalDateTime
@@ -334,9 +335,16 @@ inline fun <reified RESP: Any> FlowContent.Form(
 
 fun FlowContent.touchAndValidate(state: FormState<*>, input: InputField<*>) {
     runBrowser {
-        observe(input.valueAttr) {
+        val observer = input.valueAttr.observe {
             input.touch()
             state.validateTouched()
+        }
+//        observe() {
+//
+//        }
+        onDispose {
+            input.valueAttr.removeObserver(observer as (Any?) -> Unit)
+            println("DISPOSING?? attr ${input.name}")
         }
     }
 }

@@ -15,12 +15,21 @@ interface State<T> : Stream<T> {
 //
 //}
 
-// Mutable stream that holds exactly one value
-class MutableState<T>(value: T): MutableStream<T>(), State<T> {
+// Mutable stream that caches last value
+class MutableState<T>(value: T): MutableStream<T>(cacheLast = true), State<T> {
 
-    override var value: T by Delegates.observable(value) { _, _, newValue ->
-        emit(newValue)
+//    override var value: T by Delegates.observable(value) { _, _, newValue ->
+//        emit(newValue)
+//    }
+    init {
+        emit(value)
     }
+
+    override var value: T
+        get() = lastEmitted
+        set(value) {
+            emit(value)
+        }
 
     fun asState() = this as State<T>
 
@@ -46,4 +55,4 @@ class MutableState<T>(value: T): MutableStream<T>(), State<T> {
 //}
 
 fun <T> stateOf(value: T) = MutableState(value)
-fun <T> streamOf() = MutableStream<T>()
+fun <T> streamOf(cacheLast: Boolean = false) = MutableStream<T>(cacheLast)

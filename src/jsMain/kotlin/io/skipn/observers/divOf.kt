@@ -3,14 +3,18 @@ package io.skipn.observers
 import io.skipn.builder.BuildContext
 import io.skipn.builder.buildContext
 import io.skipn.builder.builder
+import io.skipn.events.onDispose
 import io.skipn.html.create
 import io.skipn.prepareElement
 import io.skipn.state.State
 import io.skipn.state.Stream
 import io.skipn.state.observeWithin
+import io.skipn.utils.launchBrowser
 import kotlinx.browser.document
 import kotlinx.html.*
 import org.w3c.dom.Element
+import org.w3c.dom.GlobalEventHandlers
+import org.w3c.dom.HTMLElement
 
 @HtmlTagMarker
 actual fun <V, T> FlowContent.divOf(state: State<V>, node: DIV.(V) -> T) {
@@ -21,6 +25,17 @@ actual fun <V, T> FlowContent.divOf(state: State<V>, node: DIV.(V) -> T) {
         // Creates a new Build Context
         // as a copy of the current one
         val context = builder.createContextAndDescend(element.id)
+
+//        element as GlobalEventHandlers
+//        element.onclick = {
+//            context.scope.disposeChildren()
+//
+//            element = replaceElement(element, context) {
+////                node(state.value)
+//            }
+//            Unit
+//        }
+//        +"asdd"
 
         // Run node first
         node(state.value)
@@ -133,6 +148,9 @@ inline fun replaceElement(element: Element, context: BuildContext, crossinline n
 
         node()
     }
+//    element.innerHTML = ""
+//    (element as? HTMLElement)?.innerText = ""
+//    element.remove()
     element.replaceWith(newElement)
     return newElement
 }
