@@ -18,7 +18,9 @@ import io.skipn.form.FormValidator
 ////}
 //
 //
-actual abstract class EndpointBase<REQ : Any, RESP : Any> {
+actual abstract class EndpointBase<REQ : Any, RESP : Any> actual constructor(
+    actual val cookies: List<String>?
+) {
 
     val route = parseApiRoute(this)
     lateinit var implementedFunc: suspend ApplicationCall.(REQ) -> RESP

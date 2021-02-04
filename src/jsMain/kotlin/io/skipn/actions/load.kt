@@ -1,16 +1,16 @@
 package io.skipn.actions
 
-import io.ktor.client.request.*
-import io.ktor.http.*
+import Api
 import io.skipn.Endpoint
-import io.skipn.platform.DEV
 import io.skipn.SkipnContext
-import io.skipn.api
 import io.skipn.errors.ApiError
+import io.skipn.platform.DEV
+import io.skipn.utils.encodeToStringStatic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.json.Json
 
 actual inline fun <reified RESP : Any> loader(
     skipnContext: SkipnContext,
@@ -62,9 +62,16 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
         endpoint: Endpoint<REQ, RESP>,
         request: REQ
 ): suspend () -> RESP = {
-    api.post(endpoint.route) {
-        contentType(ContentType.Application.Json)
-
-        body = request
-    }
+    Api.post(
+        endpoint,
+        body = Json.encodeToStringStatic(request),
+        headers = {
+            set("Content-Type", "application/json")
+        },
+    )
+//    api.post(endpoint.route) {
+//        contentType(ContentType.Application.Json)
+//
+//        body = request
+//    }
 }

@@ -10,7 +10,7 @@ actual object Cookies {
         return getAll()[name]
     }
 
-    private fun getAll(): Map<String, String> {
+    fun getAll(): Map<String, String> {
         return document.cookie.split(";").map {
             val cookie = it.trim()
             val keyVal = cookie.split("=")
