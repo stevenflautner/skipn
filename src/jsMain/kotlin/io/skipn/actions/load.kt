@@ -2,8 +2,10 @@ package io.skipn.actions
 
 import Api
 import io.skipn.Endpoint
+import io.skipn.EndpointBase
 import io.skipn.SkipnContext
 import io.skipn.errors.ApiError
+import io.skipn.platform.Cookies
 import io.skipn.platform.DEV
 import io.skipn.utils.encodeToStringStatic
 import kotlinx.coroutines.GlobalScope
@@ -74,4 +76,19 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
 //
 //        body = request
 //    }
+}
+
+fun EndpointBase<*, *>.getCookieString(): String? {
+    cookies?.let { cookieNames ->
+        val browserCookies = Cookies.getAll()
+        val cookieString = StringBuilder()
+
+        cookieNames.forEach { cookieName ->
+            browserCookies[cookieName]?.let {
+                cookieString.append(" $it;")
+            }
+        }
+        return cookieString.toString()
+    }
+    return null
 }

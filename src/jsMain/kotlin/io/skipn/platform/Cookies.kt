@@ -2,7 +2,6 @@ package io.skipn.platform
 
 import io.skipn.SkipnContext
 import kotlinx.browser.document
-import kotlin.js.Date
 
 actual object Cookies {
 

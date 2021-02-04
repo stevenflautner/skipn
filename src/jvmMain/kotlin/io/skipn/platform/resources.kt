@@ -1,5 +1,6 @@
 package io.skipn.platform
 
+import io.skipn.utils.encodeToStringStatic
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -17,6 +18,9 @@ actual class SkipnResources actual constructor() {
     }
 
     fun createSnapshot(): String {
-        return Json.encodeToString(JsonObject(resources))
+        println("SNAPSHOTT22")
+        val d = Json.encodeToStringStatic(JsonObject(resources))
+        println(d)
+        return Json.encodeToStringStatic(JsonObject(resources))
     }
 }

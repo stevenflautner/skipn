@@ -42,9 +42,9 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kversion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
-                implementation("io.ktor:ktor-client-core:$kversion")
-                implementation("io.ktor:ktor-client-json:$kversion")
-                implementation("io.ktor:ktor-client-serialization:$kversion")
+//                implementation("io.ktor:ktor-client-core:$kversion")
+//                implementation("io.ktor:ktor-client-json:$kversion")
+//                implementation("io.ktor:ktor-client-serialization:$kversion")
 //                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
             }
@@ -60,6 +60,10 @@ kotlin {
                 implementation("io.ktor:ktor-server-netty:$kversion")
 //                implementation("io.ktor:ktor-html-builder:$kversion")
                 implementation("io.ktor:ktor-serialization:$kversion")
+
+                implementation("io.ktor:ktor-client-core:$kversion")
+                implementation("io.ktor:ktor-client-json:$kversion")
+                implementation("io.ktor:ktor-client-serialization:$kversion")
             }
         }
         val jvmTest by getting {

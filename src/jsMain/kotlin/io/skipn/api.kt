@@ -1,4 +1,5 @@
 import io.skipn.EndpointBase
+import io.skipn.actions.getCookieString
 import io.skipn.errors.ApiError
 import io.skipn.platform.DEV
 import io.skipn.utils.decodeFromStringStatic

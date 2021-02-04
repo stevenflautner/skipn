@@ -1,7 +1,6 @@
 package io.skipn.ktor
 
 import io.ktor.application.*
-import io.ktor.client.features.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*

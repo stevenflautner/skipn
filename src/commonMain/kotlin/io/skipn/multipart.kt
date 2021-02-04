@@ -1,6 +1,5 @@
 package io.skipn
 
-import io.ktor.http.*
-
-class FileData(val bytes: ByteArray, val type: ContentType?)
+//TODO Content type
+class FileData(val bytes: ByteArray, val type: Int?)
 typealias FileList = ArrayList<FileData>
