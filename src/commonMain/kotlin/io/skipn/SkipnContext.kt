@@ -11,8 +11,6 @@ import kotlinx.html.FlowContent
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
-class Route(val route: String, val oldRoute: String? = null)
-
 expect class SkipnContext: SkipnContextBase {
 
     var isInitializing: Boolean

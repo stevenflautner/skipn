@@ -61,14 +61,14 @@ inline fun FlowOrMetaDataOrPhrasingContent.noScript(classes : String? = null, cr
  * Script statements
  */
 @HtmlTagMarker
-inline fun FlowOrMetaDataOrPhrasingContent.script(type : String? = null, src : String? = null, crossinline block : SCRIPT.() -> Unit = {}) : Unit = SCRIPT(attributesMapOf("type", type,"src", src), consumer).visit(block)
+inline fun FlowOrMetaDataOrPhrasingContent.scriptInternal(type : String? = null, src : String? = null, crossinline block : SCRIPT.() -> Unit = {}) : Unit = SCRIPT(attributesMapOf("type", type,"src", src), consumer).visit(block)
 @Deprecated("This tag doesn't support content or requires unsafe (try unsafe {})")
 @Suppress("DEPRECATION")
 /**
  * Script statements
  */
 @HtmlTagMarker
-fun FlowOrMetaDataOrPhrasingContent.script(type : String? = null, src : String? = null, content : String = "") : Unit = SCRIPT(attributesMapOf("type", type,"src", src), consumer).visit({+content})
+fun FlowOrMetaDataOrPhrasingContent.scriptInternal(type : String? = null, src : String? = null, content : String = "") : Unit = SCRIPT(attributesMapOf("type", type,"src", src), consumer).visit({+content})
 
 
 /**

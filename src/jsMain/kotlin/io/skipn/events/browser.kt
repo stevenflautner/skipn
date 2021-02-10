@@ -1,10 +1,11 @@
 package io.skipn.events
 
-import io.skipn.*
+import io.skipn.FormEndpoint
 import io.skipn.browser.BrowserElement
-import io.skipn.builder.builder
 import io.skipn.builder.launch
 import io.skipn.form.FormBuilder
+import io.skipn.prepareElement
+import io.skipn.skipnContext
 import kotlinx.browser.document
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -34,13 +35,13 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
 }
 
 @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
-actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((Event) -> Unit)?) {
+actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((BrowserEvent) -> Unit)?) {
     if (onClick == null) return
     val elem = prepareElement() as GlobalEventHandlers
 
     elem.onclick = {
         if (it.target != elem && ignoreChildren) null
-        else onClick(Event(it))
+        else onClick(BrowserEvent(it))
     }
 }
 
@@ -162,3 +163,12 @@ actual fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit) {
         onKeyUp(it.key)
     }
 }
+
+actual fun FlowContent.onChange(onChange: (BrowserEvent) -> Unit) {
+    prepareEvent().onchange = {
+        onChange(it.toBrowserEvent())
+    }
+}
+
+private fun FlowContent.prepareEvent() = prepareElement()
+    .let { it as GlobalEventHandlers }

@@ -33,7 +33,7 @@ abstract class RouterBase(fullRoute: String) {
     fun parameter(key: String, scope: CoroutineScope) = stream.filterIsInstance<ParameterChange>()
         .filter { it.key == key }
         .map { it.value }
-        .stateIn(scope, SharingStarted.Eagerly, getParameterValue(key))
+        .stateIn(scope, SharingStarted.Lazily, getParameterValue(key))
 }
 
 expect class Router(fullRoute: String) : RouterBase {

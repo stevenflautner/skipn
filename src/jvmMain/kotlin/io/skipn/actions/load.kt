@@ -43,3 +43,10 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
 ): suspend () -> RESP = {
     endpoint.implementedFunc(skipnContext.applicationCall, request)
 }
+
+actual inline fun <reified REQ : Any, reified RESP : Any> browserPost(
+    endpoint: Endpoint<REQ, RESP>,
+    request: REQ
+): suspend () -> RESP {
+    throw BrowserOnlyFunction
+}

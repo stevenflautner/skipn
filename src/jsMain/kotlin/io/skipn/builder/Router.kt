@@ -1,9 +1,16 @@
 package io.skipn.builder
 
 import io.skipn.actions.updateUrlParameter
+import kotlinx.browser.window
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute) {
+
+    private val coroutineScope = CoroutineScope(SupervisorJob())
 
     actual fun changeParameter(key: String, newValue: Any?) {
         if (newValue == null) {
@@ -13,7 +20,10 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
         }
 
         updateUrlParameter(route.parameters.formUrlEncode())
-        stream.tryEmit(ParameterChange(key, newValue?.toString()))
+        coroutineScope.launch {
+            stream.emit(ParameterChange(key, newValue?.toString()))
+        }
+//        stream.tryEmit(ParameterChange(key, newValue?.toString()))
     }
 
     actual fun changeRoute(fullRoute: String) {
@@ -34,16 +44,29 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
             val newRoute = newRouteValues.getOrNull(i)
 
             if (oldRoute != newRoute) {
-                stream.tryEmit(RouteChange(i, newRoute))
+                coroutineScope.launch {
+                    stream.emit(RouteChange(i, newRoute))
+                }
+//                stream.tryEmit(RouteChange(i, newRoute))
                 foundRouteDifference = true
                 break
             }
         }
 
+        if (foundRouteDifference) {
+            // Reset scroll when route changed
+            window.scrollTo(0.0, 0.0)
+        }
+
         // If the two are identical up until the size of the new array,
         // then check if they are of the same size. If not, then there was a change of route
         if (!foundRouteDifference && oldRouteValues.size != newRouteValues.size) {
-            stream.tryEmit(RouteChange(newRouteValues.lastIndex, newRouteValues.last()))
+            // Reset scroll when route changed
+            window.scrollTo(0.0, 0.0)
+            coroutineScope.launch {
+                stream.emit(RouteChange(newRouteValues.lastIndex, newRouteValues.last()))
+            }
+//            stream.tryEmit(RouteChange(newRouteValues.lastIndex, newRouteValues.last()))
         }
     }
 
@@ -58,7 +81,9 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
             val newValue = newParameters[it.key]
 
             if (oldValue != newValue) {
-                stream.tryEmit(ParameterChange(it.key, newValue))
+                coroutineScope.launch {
+                    stream.emit(ParameterChange(it.key, newValue))
+                }
             }
         }
     }

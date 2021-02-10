@@ -1,12 +1,16 @@
 import io.skipn.EndpointBase
 import io.skipn.actions.getCookieString
 import io.skipn.errors.ApiError
+import io.skipn.platform.Cookies
 import io.skipn.platform.DEV
 import io.skipn.utils.decodeFromStringStatic
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.json.Json
+import org.w3c.fetch.INCLUDE
+import org.w3c.fetch.RequestCredentials
 import org.w3c.fetch.RequestInit
+import org.w3c.fetch.SAME_ORIGIN
 import kotlin.js.json
 
 object Api {
@@ -21,14 +25,20 @@ object Api {
 
         val url = "http://$host:$port${endpoint.route}"
 
+        val credentials = if (!DEV) RequestCredentials.SAME_ORIGIN
+        else RequestCredentials.INCLUDE
+
         val response = window.fetch(
             url,
             RequestInit(
                 method = "post",
-                headers = json().let { headersJson ->
+                credentials = credentials,
+                headers = json().also { headersJson ->
+
                     // Required so that if we get a 'Set-Cookie' header in the
                     // response it is applied to the browser
-                    headersJson["credentials"] = "same-origin"
+//                    headersJson["Credentials"] = "same-origin"
+//                    headersJson["Origin"] = "http://localhost:8080"
 
                     // Send the required cookies to the server
                     endpoint.getCookieString()?.let {
@@ -43,12 +53,17 @@ object Api {
             )
         ).await()
 
-        val json = JSON.stringify(response.json().await())
-
-        if (!response.ok) {
-            throw ApiError(json)
+        if (DEV) {
+            response.headers.get("Set-Cookie")?.let {
+                Cookies.store(it)
+            }
         }
 
+        if (!response.ok) {
+            throw ApiError(response.text().await())
+        }
+
+        val json = JSON.stringify(response.json().await())
         return Json.decodeFromStringStatic(json)
     }
 }

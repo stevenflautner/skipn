@@ -18,9 +18,6 @@ actual class SkipnResources actual constructor() {
     }
 
     fun createSnapshot(): String {
-        println("SNAPSHOTT22")
-        val d = Json.encodeToStringStatic(JsonObject(resources))
-        println(d)
-        return Json.encodeToStringStatic(JsonObject(resources))
+        return Json.encodeToString(JsonObject(resources))
     }
 }

@@ -1,6 +1,6 @@
 package io.skipn.browser
 
-expect open class BrowserElement {
+expect open class BrowserElement : BrowserAny {
     fun setClasses(classes: String)
     fun setWidth(width: Double)
     fun setHeight(height: Double)

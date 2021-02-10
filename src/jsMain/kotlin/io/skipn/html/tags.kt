@@ -40,19 +40,18 @@ actual fun HEAD.skipnHead() {
  * Browser should append it to the head.
  */
 @HtmlTagMarker
-actual inline fun FlowContent.script(
+actual inline fun FlowOrMetaDataOrPhrasingContent.script(
     type: String?,
     src: String?,
     crossinline block: SCRIPT.() -> Unit
 ) {
-    ensureRunAfterInitialization {
-        val context = builder.rootBuildContext
+    val context = builder.rootBuildContext
 
+    ensureRunAfterInitialization {
         document.head?.let { head ->
             head.append(document.create(context).script {
                 block()
             })
-//            document.head!!.appendElement("script") {}
         }
     }
 }

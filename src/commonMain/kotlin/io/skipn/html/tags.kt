@@ -79,4 +79,4 @@ fun FlowContent.Link(href: String?, classes: String? = null, body: DomElement? =
  * Server ignores the script tag defined
  */
 @HtmlTagMarker
-expect inline fun FlowContent.script(type : String? = null, src : String? = null, crossinline block : SCRIPT.() -> Unit = {})
+expect inline fun FlowOrMetaDataOrPhrasingContent.script(type : String? = null, src : String? = null, crossinline block : SCRIPT.() -> Unit = {})

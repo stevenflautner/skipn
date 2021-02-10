@@ -44,12 +44,13 @@ actual class LoadTask<RESP : Any> actual constructor(
     private var job: Job? = null
 
     actual fun execute(onSuccess: ResponseSuccess<RESP>, onFailure: ResponseFailure) {
-        try {
-            job = GlobalScope.launch {
-                onSuccess(load())
+        job = GlobalScope.launch {
+            try {
+                val load = load()
+                onSuccess(load)
+            } catch (e: ApiError) {
+                onFailure(e)
             }
-        } catch (e: ApiError) {
-            onFailure(e)
         }
     }
 
@@ -71,11 +72,20 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
             set("Content-Type", "application/json")
         },
     )
-//    api.post(endpoint.route) {
-//        contentType(ContentType.Application.Json)
-//
-//        body = request
-//    }
+}
+
+@OptIn(InternalSerializationApi::class)
+actual inline fun <reified REQ : Any, reified RESP : Any> browserPost(
+    endpoint: Endpoint<REQ, RESP>,
+    request: REQ
+): suspend () -> RESP = {
+    Api.post(
+        endpoint,
+        body = Json.encodeToStringStatic(request),
+        headers = {
+            set("Content-Type", "application/json")
+        },
+    )
 }
 
 fun EndpointBase<*, *>.getCookieString(): String? {
