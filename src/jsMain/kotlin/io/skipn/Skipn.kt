@@ -32,18 +32,6 @@ object Skipn {
 
     lateinit var errorSerializer: ErrorSerializer<Exception>
 
-    inline fun <reified T: Exception> errorSerializer() {
-        errorSerializer = {
-            println(it)
-            val a =Json.decodeFromString<T>(it)
-            println("ERRRRRRR")
-            println(T::class)
-            println(a)
-            a
-//            it.receive<T>()
-        }
-    }
-
     fun initialize(app: HtmlApp.() -> Unit) {
         createSkipnContext { skipnContext ->
             context = skipnContext
@@ -51,7 +39,9 @@ object Skipn {
             DEV = byId("skipn-main-script").getAttribute("data-dev") == "true"
 
             window.onpopstate = {
-                context.router.changeRoute(window.location.href)
+                val route = "${window.location.pathname}${window.location.search}"
+                println("WOUTE CHANGEDD ${route}")
+                context.router.changeRoute(route)
             }
 
             val rootBuildContext = BuildContext.createRoot(skipnContext)

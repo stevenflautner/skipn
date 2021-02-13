@@ -1,12 +1,12 @@
 import java.util.*
 
 plugins {
-    kotlin("multiplatform") version "1.4.21"
+    kotlin("multiplatform") version "1.4.30-RC"
     id("maven-publish")
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.99593_6"
+version = "0.0.99593_7"
 val kversion = "1.4.2"
 
 repositories {
@@ -56,14 +56,15 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            val ktorVersion = "1.5.1"
             dependencies {
-                implementation("io.ktor:ktor-server-netty:$kversion")
+                implementation("io.ktor:ktor-server-netty:$ktorVersion")
 //                implementation("io.ktor:ktor-html-builder:$kversion")
-                implementation("io.ktor:ktor-serialization:$kversion")
+                implementation("io.ktor:ktor-serialization:$ktorVersion")
 
-                implementation("io.ktor:ktor-client-core:$kversion")
-                implementation("io.ktor:ktor-client-json:$kversion")
-                implementation("io.ktor:ktor-client-serialization:$kversion")
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-json:$ktorVersion")
+                implementation("io.ktor:ktor-client-serialization:$ktorVersion")
             }
         }
         val jvmTest by getting {

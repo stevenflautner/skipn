@@ -31,8 +31,8 @@ actual class Router actual constructor(fullRoute: String) : RouterBase(fullRoute
         val newRoute = ParsedRoute(fullRoute)
         route = newRoute
 
-        updateRoute(oldRoute.routeValues, newRoute.routeValues)
         updateParameters(oldRoute.parameters, newRoute.parameters)
+        updateRoute(oldRoute.routeValues, newRoute.routeValues)
     }
 
     actual fun updateRoute(oldRouteValues: List<String>, newRouteValues: List<String>) {
