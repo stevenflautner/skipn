@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class FIELDSET(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("fieldset", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class FIELDSET(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("fieldset", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var disabled : Boolean
         get()  = attributeBooleanTicker.get(this, "disabled")
         set(newValue) {attributeBooleanTicker.set(this, "disabled", newValue)}
@@ -33,12 +33,12 @@ inline fun FIELDSET.legend(classes : String? = null, crossinline block : LEGEND.
 
 
 @Suppress("unused")
-open class FIGCAPTION(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("figcaption", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class FIGCAPTION(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("figcaption", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class FIGURE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("figure", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class FIGURE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("figure", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 /**
@@ -55,12 +55,12 @@ inline fun FIGURE.figcaption(classes : String? = null, crossinline block : FIGCA
 
 
 @Suppress("unused")
-open class FOOTER(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("footer", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class FOOTER(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("footer", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class FORM(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("form", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class FORM(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("form", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var acceptCharset : String
         get()  = attributeStringString.get(this, "accept-charset")
         set(newValue) {attributeStringString.set(this, "accept-charset", newValue)}

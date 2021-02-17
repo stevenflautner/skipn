@@ -6,6 +6,8 @@ import io.skipn.form.FormBuilder
 import kotlinx.html.FORM
 import kotlinx.html.FlowContent
 
+expect inline fun FlowContent.onEvent(name: String, crossinline onEvent: ((BrowserEvent) -> Unit))
+
 expect fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit)
 expect fun FlowContent.onClick(ignoreChildren: Boolean = false, onClick: ((BrowserEvent) -> Unit)? = null)
 expect fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit)

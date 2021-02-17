@@ -2,10 +2,11 @@ package io.skipn.builder
 
 import io.skipn.html.HTMLStreamBuilder
 import kotlinx.html.FlowContent
+import kotlinx.html.Tag
 import kotlinx.html.consumers.DelayedConsumer
 import kotlinx.html.consumers.FinalizeConsumer
 
-actual val FlowContent.builder: Builder
+actual val Tag.builder: Builder
     get() {
         var consumer = consumer
         if (consumer is DelayedConsumer) {
@@ -22,15 +23,15 @@ actual interface Builder {
     actual val rootBuildContext: BuildContext
     actual var currentBuildContext: BuildContext
 
-    val routerTree: ArrayDeque<String>
+    val routerTree: ArrayDeque<Tag>
 
-    fun descendRoute(id: String) {
+    fun descendRoute(tag: Tag) {
         rootBuildContext.routeLevel++
-        routerTree.addLast(id)
+        routerTree.addLast(tag)
     }
 
-    fun ascendRoute(id: String?) {
-        if (id == null || routerTree.lastOrNull() != id) return
+    fun ascendRoute(tag: Tag) {
+        if (routerTree.lastOrNull() !== tag) return
         rootBuildContext.routeLevel--
         routerTree.removeLast()
     }

@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class TABLE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("table", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class TABLE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("table", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var summary : String
         get()  = attributeStringString.get(this, "summary")
         set(newValue) {attributeStringString.set(this, "summary", newValue)}
@@ -55,7 +55,7 @@ inline fun TABLE.tr(classes : String? = null, crossinline block : TR.() -> Unit 
 
 
 @Suppress("unused")
-open class TBODY(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("tbody", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
+open class TBODY(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("tbody", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
 
 }
 /**
@@ -66,7 +66,7 @@ inline fun TBODY.tr(classes : String? = null, crossinline block : TR.() -> Unit 
 
 
 @Suppress("unused")
-open class TD(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("td", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class TD(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("td", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var headers : String
         get()  = attributeStringString.get(this, "headers")
         set(newValue) {attributeStringString.set(this, "headers", newValue)}
@@ -83,7 +83,7 @@ open class TD(initialAttributes : Map<String, String>, override val consumer : T
 }
 
 @Suppress("unused")
-open class TEXTAREA(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("textarea", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class TEXTAREA(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("textarea", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var autoFocus : Boolean
         get()  = attributeBooleanTicker.get(this, "autofocus")
         set(newValue) {attributeBooleanTicker.set(this, "autofocus", newValue)}
@@ -145,7 +145,7 @@ val TEXTAREA.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class TFOOT(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("tfoot", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
+open class TFOOT(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("tfoot", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
 
 }
 /**
@@ -156,7 +156,7 @@ inline fun TFOOT.tr(classes : String? = null, crossinline block : TR.() -> Unit 
 
 
 @Suppress("unused")
-open class TH(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("th", consumer, initialAttributes, null, false, false), HtmlInlineTag {
+open class TH(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("th", consumer, initialAttributes, null, false, false), HtmlInlineTag {
     var headers : String
         get()  = attributeStringString.get(this, "headers")
         set(newValue) {attributeStringString.set(this, "headers", newValue)}
@@ -177,7 +177,7 @@ open class TH(initialAttributes : Map<String, String>, override val consumer : T
 }
 
 @Suppress("unused")
-open class THEAD(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("thead", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
+open class THEAD(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("thead", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
 
 }
 /**
@@ -188,7 +188,7 @@ inline fun THEAD.tr(classes : String? = null, crossinline block : TR.() -> Unit 
 
 
 @Suppress("unused")
-open class TIME(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("time", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class TIME(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("time", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
     var dateTime : String
         get()  = attributeStringString.get(this, "datetime")
         set(newValue) {attributeStringString.set(this, "datetime", newValue)}
@@ -203,12 +203,12 @@ val TIME.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class TITLE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("title", consumer, initialAttributes, null, false, false), HtmlHeadTag {
+open class TITLE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("title", consumer, initialAttributes, null, false, false), HtmlHeadTag {
 
 }
 
 @Suppress("unused")
-open class TR(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("tr", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
+open class TR(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("tr", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
 
 }
 /**

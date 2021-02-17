@@ -1,5 +1,7 @@
 package io.skipn.html
 
+import io.skipn.Skipn
+import io.skipn.Snabbdom
 import io.skipn.builder.builder
 import io.skipn.ensureRunAfterInitialization
 import io.skipn.platform.DEV
@@ -8,6 +10,7 @@ import kotlinx.browser.window
 import kotlinx.dom.appendElement
 import kotlinx.html.*
 import org.w3c.dom.HTMLHeadElement
+import snabbdom.buildVDom
 
 actual fun BODY.skipnBody() {
     if (DEV) {
@@ -24,10 +27,25 @@ actual fun BODY.skipnBody() {
 }
 
 actual fun HEAD.skipnHead() {
-    if (DEV) {
-        meta { charset = "utf-8" }
-        meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
+    meta { charset = "utf-8" }
+    meta { attributes["http-equiv"] = "Cache-control"; content = "public" }
+    meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
+    if (!DEV) {
+        link {
+            rel = "stylesheet"; type="text/css"; href = "/public/${Skipn.buildHash}.css"
+        }
+        scriptInternal {
+            type = "text/javascript"
+            src = "/public/${Skipn.buildHash}.js"
+            attributes["id"] = "skipn-main-script"
+            attributes["data-hash"] = Skipn.buildHash
+        }
     }
+
+//    if (DEV) {
+//        meta { charset = "utf-8" }
+//        meta { name = "viewport"; content = "width=device-width, initial-scale=1" }
+//    }
 }
 
 /**
@@ -49,9 +67,10 @@ actual inline fun FlowOrMetaDataOrPhrasingContent.script(
 
     ensureRunAfterInitialization {
         document.head?.let { head ->
-            head.append(document.create(context).script {
+            val script = buildVDom(context).script {
                 block()
-            })
+            }
+            Snabbdom.patch(head, script)
         }
     }
 }

@@ -1,5 +1,6 @@
 package io.skipn.observers
 
+import VNode
 import io.skipn.builder.launch
 import io.skipn.prepareElement
 import kotlinx.coroutines.flow.Flow
@@ -9,8 +10,8 @@ import kotlinx.html.FlowContent
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLInputElement
 
-private fun updateElement(element: Element, text: String) {
-    element.textContent = text
+private fun updateElement(vNode: VNode, text: String) {
+//    element.textContent = text
 }
 
 actual fun <T> FlowContent.textOf(

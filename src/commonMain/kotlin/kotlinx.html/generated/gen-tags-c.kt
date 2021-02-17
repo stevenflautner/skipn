@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class CANVAS(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("canvas", consumer, initialAttributes, null, false, false), HtmlBlockInlineTag {
+open class CANVAS(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("canvas", consumer, initialAttributes, null, false, false), HtmlBlockInlineTag {
     var width : String
         get()  = attributeStringString.get(this, "width")
         set(newValue) {attributeStringString.set(this, "width", newValue)}
@@ -29,12 +29,12 @@ val CANVAS.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class CAPTION(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("caption", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class CAPTION(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("caption", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class CITE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("cite", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class CITE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("cite", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val CITE.asFlowContent : FlowContent
@@ -45,7 +45,7 @@ val CITE.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class CODE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("code", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class CODE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("code", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val CODE.asFlowContent : FlowContent
@@ -56,7 +56,7 @@ val CODE.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class COL(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("col", consumer, initialAttributes, null, false, true), CommonAttributeGroupFacade {
+open class COL(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("col", consumer, initialAttributes, null, false, true), CommonAttributeGroupFacade {
     var span : String
         get()  = attributeStringString.get(this, "span")
         set(newValue) {attributeStringString.set(this, "span", newValue)}
@@ -65,7 +65,7 @@ open class COL(initialAttributes : Map<String, String>, override val consumer : 
 }
 
 @Suppress("unused")
-open class COLGROUP(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("colgroup", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
+open class COLGROUP(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("colgroup", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacade {
     var span : String
         get()  = attributeStringString.get(this, "span")
         set(newValue) {attributeStringString.set(this, "span", newValue)}
@@ -80,7 +80,7 @@ inline fun COLGROUP.col(classes : String? = null, crossinline block : COL.() -> 
 
 
 @Suppress("unused")
-open class COMMAND(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("command", consumer, initialAttributes, null, true, true), CommonAttributeGroupFacadeFlowMetaDataPhrasingContent {
+open class COMMAND(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("command", consumer, initialAttributes, null, true, true), CommonAttributeGroupFacadeFlowMetaDataPhrasingContent {
     var type : CommandType
         get()  = attributeCommandTypeEnumCommandTypeValues.get(this, "type")
         set(newValue) {attributeCommandTypeEnumCommandTypeValues.set(this, "type", newValue)}

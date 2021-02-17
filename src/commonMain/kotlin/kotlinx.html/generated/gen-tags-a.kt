@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class A(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("a", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class A(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("a", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var href : String
         get()  = attributeStringString.get(this, "href")
         set(newValue) {attributeStringString.set(this, "href", newValue)}
@@ -48,7 +48,7 @@ val A.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class ABBR(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("abbr", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class ABBR(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("abbr", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val ABBR.asFlowContent : FlowContent
@@ -59,12 +59,12 @@ val ABBR.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class ADDRESS(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("address", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class ADDRESS(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("address", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class AREA(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("area", consumer, initialAttributes, null, true, true), HtmlBlockInlineTag {
+open class AREA(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("area", consumer, initialAttributes, null, true, true), HtmlBlockInlineTag {
     var coords : String
         get()  = attributeStringString.get(this, "coords")
         set(newValue) {attributeStringString.set(this, "coords", newValue)}
@@ -111,7 +111,7 @@ val AREA.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class ARTICLE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("article", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowSectioningContent {
+open class ARTICLE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("article", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowSectioningContent {
 
 }
 val ARTICLE.asFlowContent : FlowContent
@@ -122,7 +122,7 @@ val ARTICLE.asSectioningContent : SectioningContent
 
 
 @Suppress("unused")
-open class ASIDE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("aside", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowSectioningContent {
+open class ASIDE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("aside", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowSectioningContent {
 
 }
 val ASIDE.asFlowContent : FlowContent
@@ -133,7 +133,7 @@ val ASIDE.asSectioningContent : SectioningContent
 
 
 @Suppress("unused")
-open class AUDIO(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("audio", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class AUDIO(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("audio", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var src : String
         get()  = attributeStringString.get(this, "src")
         set(newValue) {attributeStringString.set(this, "src", newValue)}

@@ -21,7 +21,7 @@ class HTMLStreamBuilder<out O : Appendable>(
     private var ln = true
 
 //    override var routeLevel: Int = 0
-    override val routerTree = ArrayDeque<String>()
+    override val routerTree = ArrayDeque<Tag>()
 
     override var currentBuildContext = rootBuildContext
 
@@ -73,7 +73,7 @@ class HTMLStreamBuilder<out O : Appendable>(
     override fun onTagEnd(tag: Tag) {
         val id = tag.attributes["id"]
 
-        ascendRoute(id)
+        ascendRoute(tag)
 
         level--
         if (ln) {
@@ -154,13 +154,13 @@ class HTMLStreamBuilder<out O : Appendable>(
     }
 }
 
-fun createHTML(rootBuildContext: BuildContext, prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false): TagConsumer<String> =
-        HTMLStreamBuilder(
-                StringBuilder(AVERAGE_PAGE_SIZE),
-                rootBuildContext,
-                prettyPrint,
-                xhtmlCompatible
-        ).onFinalizeMap { sb, _ -> sb.toString() }.delayed()
+//fun createHTML(rootBuildContext: BuildContext, prettyPrint: Boolean = true, xhtmlCompatible: Boolean = false): TagConsumer<String> =
+//        HTMLStreamBuilder(
+//                StringBuilder(AVERAGE_PAGE_SIZE),
+//                rootBuildContext,
+//                prettyPrint,
+//                xhtmlCompatible
+//        ).onFinalizeMap { sb, _ -> sb.toString() }.delayed()
 
 private const val AVERAGE_PAGE_SIZE = 32768
 

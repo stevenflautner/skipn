@@ -1,25 +1,25 @@
 package io.skipn.observers
 
+import VNode
+import io.skipn.Snabbdom
 import io.skipn.builder.BuildContext
 import io.skipn.builder.buildContext
 import io.skipn.builder.builder
-import io.skipn.html.create
 import io.skipn.prepareElement
-import kotlinx.browser.document
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.html.*
-import org.w3c.dom.Element
+import snabbdom.buildVDom
 
 @HtmlTagMarker
 actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T) {
     div {
-        var element = prepareElement()
+        var vNode = prepareElement()
         val parentScope = buildContext.getCoroutineScope()
 
         // Creates a new Build Context
         // as a copy of the current one
-        val context = builder.createContextAndDescend(element.id)
+        val context = builder.createContextAndDescend(vNode)
 
         val currentValue = stateFlow.value
 
@@ -36,11 +36,16 @@ actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T)
 
             stateFlow.drop(drop).collect { value ->
                 context.cancelAndCreateScope(parentScope)
-                context.getCoroutineScope().launch {
-                    element = replaceElement(element, context) {
-                        node(value)
-                    }
+
+                vNode = replaceElement(vNode, context) {
+                    node(value)
                 }
+
+//                context.getCoroutineScope().launch {
+//                    vNode = replaceElement(vNode, context) {
+//                        node(value)
+//                    }
+//                }
             }
         }
     }
@@ -52,12 +57,12 @@ actual fun FlowContent.divOf(
     node: DIV.() -> Unit
 ) {
     div {
-        var element = prepareElement()
+        var vNode = prepareElement()
         val parentScope = buildContext.getCoroutineScope()
 
         // Creates a new Build Context
         // as a copy of the current one
-        val context = builder.createContextAndDescend(element.id)
+        val context = builder.createContextAndDescend(vNode)
 
         // Run node first
         node()
@@ -70,25 +75,63 @@ actual fun FlowContent.divOf(
             // So we only notify newly emitted values
             flow.drop(drop).collect {
                 context.cancelAndCreateScope(parentScope)
-                context.getCoroutineScope().launch {
-                    element = replaceElement(element, context) {
-                        node()
-                    }
+
+                vNode = replaceElement(vNode, context) {
+                    node()
                 }
+
+//                context.getCoroutineScope().launch {
+//                    vNode = replaceElement(vNode, context) {
+//                        node()
+//                    }
+//                }
             }
         }
     }
 }
 
-fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
-    val newElement = document.create(context).div {
-        id = element.id
+//val d = io.skipn.utils.require_("morphdom.morphdom")
+//val morphdom = js("require('morphdom')")
 
+fun replaceElement(old: VNode, context: BuildContext, node: DIV.() -> Unit): VNode {
+    val new = buildVDom(context).div {
         node()
     }
-    element.replaceWith(newElement)
-    return newElement
+    return Snabbdom.patch(old, new)
+
+
+
+
+//    println("DOMM")
+//    println(element.classList)
+//    println(element.classList.value)
+//    println("DOMM1")
+//    println(newElement.classList)
+//    println(newElement.classList.value)
+//    d(element, newElement)
+//    morphdom(element, newElement, options = object : MorphDomOptions {
+//        override var childrenOnly: Boolean? = false
+////        override var onBeforeElUpdated: ((fromEl: HTMLElement, toEl: HTMLElement) -> Boolean)? = { fromEl, toEl ->
+////            // spec - https://dom.spec.whatwg.org/#concept-node-equals
+////            !fromEl.isEqualNode(toEl)
+////        }
+//    })
+
+
+//    element.replaceWith(newElement)
+//    return newElement
+//    return morphdom(element, newElement) as? Element ?: throw Exception("MORPHDOM FAILED TO RETURN ELEMENT")
 }
+
+//fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
+//    val newElement = document.create(context).div {
+//        id = element.id
+//
+//        node()
+//    }
+//    element.replaceWith(newElement)
+//    return newElement
+//}
 
 @HtmlTagMarker
 actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {

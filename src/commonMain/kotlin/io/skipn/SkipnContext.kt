@@ -8,6 +8,7 @@ import io.skipn.builder.buildContext
 import io.skipn.platform.SkipnResources
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.html.FlowContent
+import kotlinx.html.Tag
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
@@ -30,5 +31,5 @@ class Elements {
     fun generateIdInt() = compId++
 }
 
-val FlowContent.skipnContext: SkipnContext
+val Tag.skipnContext: SkipnContext
     get() = buildContext.skipnContext

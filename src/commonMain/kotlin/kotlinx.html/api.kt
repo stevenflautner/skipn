@@ -1,5 +1,6 @@
 package kotlinx.html
 
+import kotlinx.coroutines.flow.Flow
 import org.w3c.dom.events.*
 
 interface TagConsumerBase {
@@ -29,6 +30,7 @@ interface Tag {
 
     val inlineTag: Boolean
     val emptyTag: Boolean
+//    val dependsOn: ArrayList<Flow<Any>>?
 
     operator fun Entities.unaryPlus(): Unit {
         entity(this)

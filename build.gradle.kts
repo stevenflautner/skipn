@@ -6,7 +6,7 @@ plugins {
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.99593_7"
+version = "0.0.99593_9"
 val kversion = "1.4.2"
 
 repositories {
@@ -35,6 +35,7 @@ kotlin {
                 }
             }
         }
+//        useCommonJs()
     }
     sourceSets {
         val commonMain by getting {
@@ -74,6 +75,9 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+
+                implementation(npm("morphdom", "2.6.1"))
+                implementation(npm("snabbdom", "2.1.0"))
 //                implementation(devNpm("postcss-loader", "4.0.0"))
 //                implementation(devNpm("postcss", "7.0.32"))
 //                implementation(devNpm("raw-loader", ""))

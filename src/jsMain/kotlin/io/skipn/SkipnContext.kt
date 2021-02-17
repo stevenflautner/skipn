@@ -1,34 +1,37 @@
 package io.skipn
 
+import VNode
 import io.skipn.builder.BuildContext
-import io.skipn.html.JSDOMBuilder
 import io.skipn.platform.DEV
 import io.skipn.platform.SkipnResources
 import io.skipn.utils.byId
 import kotlinx.browser.window
 import kotlinx.coroutines.*
 import kotlinx.html.FlowContent
+import kotlinx.html.Tag
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
+import snabbdom.SnabbdomBuilder
 import kotlin.js.Date
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
-fun FlowContent.getUnderlyingHtmlElement(): HTMLElement {
-    val consumer = this.consumer as JSDOMBuilder
+fun Tag.getUnderlyingHtmlElement(): VNode {
+    val consumer = this.consumer as SnabbdomBuilder<VNode>
     return consumer.path.last()
 }
 
-fun FlowContent.prepareElement(): Element {
+fun Tag.prepareElement(): VNode {
     val context = skipnContext
 
     val id = attributes["id"] ?: context.points.generateId().also {
         attributes["id"] = it
     }
 
-    return if (context.isInitializing && !DEV)
-        byId(id)
-    else getUnderlyingHtmlElement()
+    return getUnderlyingHtmlElement()
+
+//    return if (context.isInitializing && !DEV)
+//        byId(id)
+//    else getUnderlyingHtmlElement()
 }
 
 actual class SkipnContext(route: String) : SkipnContextBase(route) {

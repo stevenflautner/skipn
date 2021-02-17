@@ -1,27 +1,29 @@
 package io.skipn.observers
 
+import VNode
+import addAttr
 import io.skipn.builder.buildContext
 import io.skipn.builder.launch
 import io.skipn.prepareElement
 import kotlinx.coroutines.flow.*
 import kotlinx.html.FlowContent
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 
-private fun updateElement(element: Element, name: String, value: String) {
-    when (element) {
-        is HTMLInputElement -> {
-            when(name) {
-                "value" -> element.value = value
-                "checked" -> {
-                    element.checked = value == "true"
-                }
-                else -> element.setAttribute(name, value)
-            }
-        }
-        else -> element.setAttribute(name, value)
-    }
+private fun updateElement(vNode: VNode, name: String, value: String) {
+//    vNode.addAttr(name, value)
+//    when (element) {
+//        is HTMLInputElement -> {
+//            when(name) {
+//                "value" -> element.value = value
+//                "checked" -> {
+//                    element.checked = value == "true"
+//                }
+//                else -> element.setAttribute(name, value)
+//            }
+//        }
+//        else -> element.setAttribute(name, value)
+//    }
 }
 
 actual fun <T> FlowContent.attributeOf(
@@ -29,14 +31,14 @@ actual fun <T> FlowContent.attributeOf(
     stateFlow: StateFlow<T>,
     value: (T) -> String
 ) {
-    val element = prepareElement()
+    val vNode = prepareElement()
 
-    updateElement(element, name, value(stateFlow.value))
+    updateElement(vNode, name, value(stateFlow.value))
 
     launch {
-        stateFlow.collect {
+        stateFlow.drop(1).collect {
             // TODO CHANGE THIS TO VALUEOF
-            updateElement(element, name, value(stateFlow.value))
+            updateElement(vNode, name, value(stateFlow.value))
         }
     }
 }
@@ -52,7 +54,10 @@ actual fun <T> FlowContent.attributeOf(
     updateElement(element, name, value())
 
     launch {
-        flow.collect {
+        val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
+        // Drop all values in the replay cache
+        // So we only notify newly emitted values
+        flow.drop(drop).collect {
             updateElement(element, name, value())
         }
     }

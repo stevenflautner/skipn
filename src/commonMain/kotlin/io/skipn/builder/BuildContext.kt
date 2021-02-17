@@ -5,6 +5,7 @@ package io.skipn.builder
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.html.FlowContent
+import kotlinx.html.Tag
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
@@ -20,7 +21,7 @@ expect class BuildContext : BuildContextBase {
 
 }
 
-val FlowContent.buildContext: BuildContext
+val Tag.buildContext: BuildContext
     get() = builder.currentBuildContext
 
 fun FlowContent.launch(block: suspend CoroutineScope.() -> Unit) = buildContext.launch(block)

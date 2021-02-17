@@ -22,7 +22,7 @@ actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
 
         // Creates a new Build Context
         // as a copy of the current one
-        val context = builder.createContextAndDescend(element.id, parentContext.getRouteLevel() + 1)
+        val context = builder.createContextAndDescend(element, parentContext.getRouteLevel() + 1)
 
         // Run node first
         node(route)

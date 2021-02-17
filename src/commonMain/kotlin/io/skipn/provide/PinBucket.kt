@@ -1,12 +1,13 @@
 package io.skipn.provide
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.html.Tag
 import kotlin.reflect.KClass
 
 typealias PinMap = HashMap<KClass<*>, Any?>
 
 class PinBucket(
-    val elemId: String,
+    val tag: Tag,
 ) {
     val pins = PinMap()
 }
@@ -37,7 +38,7 @@ class PinningContext(parent: PinningContext?) {
     // Defines whether there was any pin added
     // within this PinBucket
     var hasPinned = false
-    private set
+        private set
 
     // Packs current pinning context Into a hashmap.
     // Creating a pack is useful to access and store
@@ -54,40 +55,40 @@ class PinningContext(parent: PinningContext?) {
 
     // Retrieves the last bucket and if it's not for the current
     // elem, adds a new elem at the end of the queue
-    fun getBucket(elemId: String): PinBucket {
+    fun getBucket(tag: Tag): PinBucket {
         val last = children.lastOrNull()
 
         return if (last == null) {
-            PinBucket(elemId).also {
+            PinBucket(tag).also {
                 children.addLast(it)
             }
         } else {
-            if (last.elemId == elemId)
+            if (last.tag == tag)
                 last
             else {
-                PinBucket(elemId).also {
+                PinBucket(tag).also {
                     children.addLast(it)
                 }
             }
         }
     }
 
-    inline fun <reified T: Any?> pinInstance(elemId: String, instance: T) {
-        val bucket = getBucket(elemId)
+    inline fun <reified T: Any?> pinInstance(tag: Tag, instance: T) {
+        val bucket = getBucket(tag)
         bucket.pins[T::class] = instance
     }
 
-    inline fun <reified V: Any?, T: StateFlow<V>> pinStateFlow(elemId: String, stateFlow: T) {
-        val bucket = getBucket(elemId)
+    inline fun <reified V: Any?, T: StateFlow<V>> pinStateFlow(tag: Tag, stateFlow: T) {
+        val bucket = getBucket(tag)
         bucket.pins[V::class] = stateFlow
     }
 
     // Should always call ascend when any tag finished
     // within the current context
-    fun ascend(elemId: String) {
+    fun ascend(tag: Tag) {
         val last = children.lastOrNull() ?: return
         // Found element to dispose
-        if (last.elemId == elemId) {
+        if (last.tag === tag) {
             children.removeLast()
         }
     }

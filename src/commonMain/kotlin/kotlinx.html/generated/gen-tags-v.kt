@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class VAR(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("var", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class VAR(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("var", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val VAR.asFlowContent : FlowContent
@@ -21,7 +21,7 @@ val VAR.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class VIDEO(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("video", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class VIDEO(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("video", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var src : String
         get()  = attributeStringString.get(this, "src")
         set(newValue) {attributeStringString.set(this, "src", newValue)}

@@ -10,37 +10,37 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class H1(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h1", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H1(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h1", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class H2(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h2", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H2(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h2", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class H3(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h3", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H3(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h3", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class H4(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h4", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H4(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h4", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class H5(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h5", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H5(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h5", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class H6(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("h6", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
+open class H6(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("h6", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingPhrasingContent {
 
 }
 
 @Suppress("unused")
-open class HEAD(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("head", consumer, initialAttributes, null, false, false), HtmlHeadTag {
+open class HEAD(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("head", consumer, initialAttributes, null, false, false), HtmlHeadTag {
     @Deprecated("This tag most likely doesn't support text content or requires unsafe content (try unsafe {}")
     override operator fun Entities.unaryPlus() : Unit {
         @Suppress("DEPRECATION") entity(this)
@@ -69,12 +69,12 @@ open class HEAD(initialAttributes : Map<String, String>, override val consumer :
 }
 
 @Suppress("unused")
-open class HEADER(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("header", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class HEADER(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("header", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class HGROUP(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("hgroup", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingContent {
+open class HGROUP(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("hgroup", consumer, initialAttributes, null, false, false), CommonAttributeGroupFacadeFlowHeadingContent {
 
 }
 /**
@@ -121,12 +121,12 @@ val HGROUP.asHeadingContent : HeadingContent
 
 
 @Suppress("unused")
-open class HR(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("hr", consumer, initialAttributes, null, false, true), HtmlBlockTag {
+open class HR(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("hr", consumer, initialAttributes, null, false, true), HtmlBlockTag {
 
 }
 
 @Suppress("unused")
-open class HTML(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>, namespace : String? = null) : HTMLTag("html", consumer, initialAttributes, namespace, false, false), CommonAttributeGroupFacade {
+open class HTML(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>, namespace : String? = null) : HTMLTag("html", consumer, initialAttributes, namespace, false, false), CommonAttributeGroupFacade {
     var manifest : String
         get()  = attributeStringString.get(this, "manifest")
         set(newValue) {attributeStringString.set(this, "manifest", newValue)}

@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class B(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("b", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class B(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("b", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val B.asFlowContent : FlowContent
@@ -21,7 +21,7 @@ val B.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class BASE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("base", consumer, initialAttributes, null, true, true), HtmlHeadTag {
+open class BASE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("base", consumer, initialAttributes, null, true, true), HtmlHeadTag {
     var href : String
         get()  = attributeStringString.get(this, "href")
         set(newValue) {attributeStringString.set(this, "href", newValue)}
@@ -34,7 +34,7 @@ open class BASE(initialAttributes : Map<String, String>, override val consumer :
 }
 
 @Suppress("unused")
-open class BDI(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("bdi", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class BDI(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("bdi", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val BDI.asFlowContent : FlowContent
@@ -45,7 +45,7 @@ val BDI.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class BDO(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("bdo", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class BDO(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("bdo", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val BDO.asFlowContent : FlowContent
@@ -56,7 +56,7 @@ val BDO.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class BLOCKQUOTE(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("blockquote", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class BLOCKQUOTE(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("blockquote", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var cite : String
         get()  = attributeStringString.get(this, "cite")
         set(newValue) {attributeStringString.set(this, "cite", newValue)}
@@ -65,7 +65,7 @@ open class BLOCKQUOTE(initialAttributes : Map<String, String>, override val cons
 }
 
 @Suppress("unused")
-open class BODY(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("body", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class BODY(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("body", consumer, initialAttributes, null, false, false), HtmlBlockTag {
     var onAfterprint : String
         get()  = attributeStringString.get(this, "onafterprint")
         set(newValue) {attributeStringString.set(this, "onafterprint", newValue)}
@@ -122,7 +122,7 @@ open class BODY(initialAttributes : Map<String, String>, override val consumer :
 }
 
 @Suppress("unused")
-open class BR(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("br", consumer, initialAttributes, null, true, true), HtmlBlockInlineTag {
+open class BR(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("br", consumer, initialAttributes, null, true, true), HtmlBlockInlineTag {
 
 }
 val BR.asFlowContent : FlowContent
@@ -133,7 +133,7 @@ val BR.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class BUTTON(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("button", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class BUTTON(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("button", consumer, initialAttributes, null, true, false), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var autoFocus : Boolean
         get()  = attributeBooleanTicker.get(this, "autofocus")
         set(newValue) {attributeBooleanTicker.set(this, "autofocus", newValue)}

@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class EM(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("em", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class EM(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("em", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 val EM.asFlowContent : FlowContent
@@ -21,7 +21,7 @@ val EM.asPhrasingContent : PhrasingContent
 
 
 @Suppress("unused")
-open class EMBED(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("embed", consumer, initialAttributes, null, true, true), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
+open class EMBED(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("embed", consumer, initialAttributes, null, true, true), CommonAttributeGroupFacadeFlowInteractivePhrasingContent {
     var src : String
         get()  = attributeStringString.get(this, "src")
         set(newValue) {attributeStringString.set(this, "src", newValue)}

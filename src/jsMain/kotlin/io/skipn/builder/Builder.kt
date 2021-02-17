@@ -1,35 +1,37 @@
 package io.skipn.builder
 
-import io.skipn.html.JSDOMBuilder
-import io.skipn.html.SkipnInitializationBuilder
+import VNode
 import kotlinx.html.FlowContent
 import kotlinx.html.FlowOrMetaDataOrPhrasingContent
+import kotlinx.html.Tag
 import kotlinx.html.TagConsumer
 import kotlinx.html.consumers.DelayedConsumer
 import kotlinx.html.consumers.FinalizeConsumer
+import snabbdom.SnabbdomBuilder
 
-actual val FlowContent.builder: Builder
+actual val Tag.builder: Builder
     get() = getBuilder(consumer)
 
 val FlowOrMetaDataOrPhrasingContent.builder: Builder
     get() = getBuilder(consumer)
 
+//TODO ONLY RETURN SNABBDOMBUILDER
 private fun getBuilder(_consumer: TagConsumer<*>): Builder {
     var consumer = _consumer
 
     // Dynamically built tree
-    if (consumer is JSDOMBuilder)
+    if (consumer is SnabbdomBuilder)
         return consumer
     if (consumer is FinalizeConsumer<*, *>) {
         consumer = consumer.downstream
-        if (consumer is JSDOMBuilder)
+        if (consumer is SnabbdomBuilder)
             return consumer
     }
 
     // Server preloaded tree
     if (consumer is DelayedConsumer) {
         consumer = consumer.downstream
-        if (consumer is SkipnInitializationBuilder) {
+        if (consumer is SnabbdomBuilder) {
             return consumer
         }
     }
@@ -43,9 +45,9 @@ actual interface Builder {
     actual var currentBuildContext: BuildContext
     val builderContextTree: ArrayDeque<BuildContext>
 
-    fun createContextAndDescend(id: String, routeLevel: Int = currentBuildContext.getRouteLevel()): BuildContext {
+    fun createContextAndDescend(vNode: VNode, routeLevel: Int = currentBuildContext.getRouteLevel()): BuildContext {
         // Creates a copy of the states
-        val context = BuildContext.create(id, currentBuildContext, routeLevel)
+        val context = BuildContext.create(vNode, currentBuildContext, routeLevel)
 
         descendBuilder(context)
         return context
@@ -59,16 +61,17 @@ actual interface Builder {
 
     // Ascends the Builder with the
     // id of the element that ended
-    fun ascend(id: String) {
-        ascendContext(id)
+    fun ascend(vNode: VNode, tag: Tag) {
+        ascendContext(vNode, tag)
     }
 
-    private fun ascendContext(elemId: String) {
-        currentBuildContext.pinningContext.ascend(elemId)
+    //TODO SHOULD CALL ON THE SERVER
+    private fun ascendContext(vNode: VNode, tag: Tag) {
+        currentBuildContext.pinningContext.ascend(tag)
 
         // Current builder ended should ascend the build context
         // Leave the root in the context tree
-        if (currentBuildContext.id == elemId && builderContextTree.size > 1) {
+        if (currentBuildContext.vNode === vNode && builderContextTree.size > 1) {
             // In DEV mode the root #skipn-app div ascends
             // therefore we should no longer advance to the body & html tags
             // So leave root build context as current

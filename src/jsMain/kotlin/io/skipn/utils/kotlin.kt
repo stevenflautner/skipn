@@ -4,7 +4,7 @@ import kotlinx.browser.document
 import org.w3c.dom.Element
 
 @JsName("require")
-private external fun require_(module: String): dynamic
+external fun require_(module: String): dynamic
 
 fun require(module: String): dynamic {
     return require_("../../../../processedResources/browser/main/$module")

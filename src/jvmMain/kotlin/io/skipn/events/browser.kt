@@ -53,3 +53,10 @@ actual fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit) {
 actual fun FlowContent.onChange(onChange: (BrowserEvent) -> Unit) {
     prepareElement()
 }
+
+actual inline fun FlowContent.onEvent(
+    name: String,
+    crossinline onEvent: (BrowserEvent) -> Unit
+) {
+    // Empty function should not have a body
+}

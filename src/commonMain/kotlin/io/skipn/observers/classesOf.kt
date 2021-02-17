@@ -9,10 +9,13 @@ import kotlinx.html.HtmlTagMarker
 
 class ClassesBuilder {
 
-    private var classes: String = ""
+    private var classes: String? = null
 
     operator fun String.unaryPlus() {
-        classes += " $this"
+        classes = if (classes == null)
+            this
+        else
+            "$classes $this"
     }
 
     fun build(): String {
@@ -25,7 +28,7 @@ class ClassesBuilder {
     }
 
     override fun toString(): String {
-        return classes
+        return classes ?: ""
     }
 }
 

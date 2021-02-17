@@ -12,11 +12,11 @@ import kotlinx.html.div
 @HtmlTagMarker
 actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
     div {
-        val id = prepareElement()
+//        val id = prepareElement()
 
         val route = skipnContext.router.routeFor(buildContext.routeLevel)
 
-        builder.descendRoute(id)
+        builder.descendRoute(this)
 
         node(route)
     }

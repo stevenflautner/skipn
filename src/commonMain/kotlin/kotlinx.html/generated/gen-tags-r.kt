@@ -10,17 +10,17 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class RP(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("rp", consumer, initialAttributes, null, true, false), HtmlInlineTag {
+open class RP(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("rp", consumer, initialAttributes, null, true, false), HtmlInlineTag {
 
 }
 
 @Suppress("unused")
-open class RT(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("rt", consumer, initialAttributes, null, true, false), HtmlInlineTag {
+open class RT(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("rt", consumer, initialAttributes, null, true, false), HtmlInlineTag {
 
 }
 
 @Suppress("unused")
-open class RUBY(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("ruby", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
+open class RUBY(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("ruby", consumer, initialAttributes, null, true, false), HtmlBlockInlineTag {
 
 }
 /**

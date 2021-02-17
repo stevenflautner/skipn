@@ -16,14 +16,14 @@ import kotlinx.html.FlowContent
 //    return (consumer as HTMLStreamBuilder).skipnContext
 //}
 
-fun FlowContent.prepareElement(): String {
-    val context = skipnContext
+fun FlowContent.prepareElement() {
+//    val context = skipnContext
 
-    val id = attributes["id"] ?: context.points.generateId().also {
-        attributes["id"] = it
-    }
+//    val id = attributes["id"] ?: context.points.generateId().also {
+//        attributes["id"] = it
+//    }
 
-    return id
+//    return id
 }
 
 actual class SkipnContext(route: String, val applicationCall: ApplicationCall) : SkipnContextBase(route) {

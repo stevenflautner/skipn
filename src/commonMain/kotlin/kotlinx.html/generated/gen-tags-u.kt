@@ -10,7 +10,7 @@ import kotlinx.html.attributes.*
 *******************************************************************************/
 
 @Suppress("unused")
-open class UL(initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag("ul", consumer, initialAttributes, null, false, false), HtmlBlockTag {
+open class UL(initialAttributes : Map<String, String>, override var consumer : TagConsumer<*>) : HTMLTag("ul", consumer, initialAttributes, null, false, false), HtmlBlockTag {
 
 }
 /**

@@ -6,13 +6,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.html.FlowContent
 
 actual inline fun <reified V: Any?, T: StateFlow<V>> FlowContent.pin(stateFlow: T): T {
-    val id = prepareElement()
-    buildContext.pinningContext.pinStateFlow(id, stateFlow)
+    buildContext.pinningContext.pinStateFlow(this, stateFlow)
     return stateFlow
 }
 
 actual inline fun <reified T : Any> FlowContent.pin(instance: T): T {
-    val id = prepareElement()
-    buildContext.pinningContext.pinInstance(id, instance)
+    buildContext.pinningContext.pinInstance(this, instance)
     return instance
 }

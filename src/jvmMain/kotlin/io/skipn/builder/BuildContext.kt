@@ -7,19 +7,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 
 actual class BuildContext(
-        id: String,
         skipnContext: SkipnContext,
         pinningContext: PinningContext,
         internal var routeLevel: Int,
         private val coroutineScope: CoroutineScope,
-) : BuildContextBase(id, skipnContext, pinningContext) {
+) : BuildContextBase(skipnContext, pinningContext) {
 
     actual fun getCoroutineScope() = coroutineScope
 
     companion object {
         fun createRoot(skipnContext: SkipnContext): BuildContext {
             return BuildContext(
-                "skipn-root",
                 skipnContext,
                 PinningContext(parent = null),
                 0,

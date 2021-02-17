@@ -1,17 +1,18 @@
 package io.skipn.builder
 
+import VNode
 import io.skipn.SkipnContext
 import io.skipn.ensureRunAfterInitialization
 import io.skipn.provide.PinningContext
 import kotlinx.coroutines.*
 
 actual class BuildContext(
-    id: String,
+    val vNode: VNode?,
     skipnContext: SkipnContext,
     pinningContext: PinningContext,
     private val routeLevel: Int,
     private var coroutineScope: CoroutineScope
-) : BuildContextBase(id, skipnContext, pinningContext) {
+) : BuildContextBase(skipnContext, pinningContext) {
 
     actual fun getCoroutineScope(): CoroutineScope = coroutineScope
 
@@ -52,9 +53,10 @@ actual class BuildContext(
     }
 
     companion object {
-        fun create(id: String, parent: BuildContext, routeLevel: Int): BuildContext {
+        fun create(vNode: VNode, parent: BuildContext, routeLevel: Int): BuildContext {
             return BuildContext(
-                id,
+//                id,
+                vNode,
                 parent.skipnContext,
                 PinningContext(parent = parent.pinningContext),
                 routeLevel,
@@ -63,7 +65,8 @@ actual class BuildContext(
         }
         fun createRoot(skipnContext: SkipnContext): BuildContext {
             return BuildContext(
-                "skipn-root",
+//                "skipn-root",
+                null,
                 skipnContext,
                 PinningContext(parent = null),
                 0,

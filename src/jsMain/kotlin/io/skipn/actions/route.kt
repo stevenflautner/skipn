@@ -8,7 +8,6 @@ actual fun routePage(route: String) {
     if (!DEV) {
         window.history.pushState(null, route, route)
     }
-    println("PAGE ROUTED ${route}")
 
     Skipn.context.router.changeRoute(route)
 //    val curRoute = Skipn.context.route.value
