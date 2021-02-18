@@ -2,7 +2,6 @@ package io.skipn.platform
 
 import io.skipn.SkipnContext
 import kotlinx.browser.document
-import kotlin.js.Date
 
 actual object Cookies {
 
@@ -10,7 +9,7 @@ actual object Cookies {
         return getAll()[name]
     }
 
-    private fun getAll(): Map<String, String> {
+    fun getAll(): Map<String, String> {
         return document.cookie.split(";").map {
             val cookie = it.trim()
             val keyVal = cookie.split("=")

@@ -21,14 +21,3 @@ actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
         node(route)
     }
 }
-
-@HtmlTagMarker
-actual fun FlowContent.parameter(key: String, node: DIV.(String?) -> Unit) {
-    div {
-        prepareElement()
-
-        val route = skipnContext.router.getParameterValue(key)
-
-        node(route)
-    }
-}

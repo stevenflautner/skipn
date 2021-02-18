@@ -11,10 +11,7 @@ import io.skipn.observers.classesOf
 import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.html.*
 import kotlin.reflect.KProperty
@@ -92,7 +89,7 @@ class InputField<T: Any?>(
 class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
 
     val inputs = hashMapOf<String, FormField<*>>()
-    val _error = MutableStateFlow<String?>(null)
+    val error = MutableStateFlow<String?>(null)
     val validators = arrayListOf<FormValidatorFunc>()
 
     fun addInput(input: InputField<*>) {
@@ -191,17 +188,9 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         }
     }
 
-    fun resetError() {
-        _error.value = null
-    }
-
-    fun error(id: String) {
-        _error.value = id
-    }
-
     fun touch(input: InputField<*>) {
         input.touch()
-        resetError()
+        error.value = null
     }
 }
 
@@ -323,11 +312,20 @@ inline fun <reified RESP: Any> FlowContent.Form(
             body()
         }
 
-        divOf(state._error) { msg ->
+        divOf(state.error) { msg ->
             if (msg == null) return@divOf
-            p("text-red-500 text-sm italic pt-2") {
+            p("text-red-500 text-sm italic px-2 pt-2") {
                 +msg
             }
+        }
+    }
+}
+
+fun FlowContent.touchAndValidate(state: FormState<*>, input: InputField<*>) {
+    launch {
+        input.valueAttr.drop(1).collect {
+            state.touch(input)
+            state.validateTouched()
         }
     }
 }
@@ -342,12 +340,7 @@ inline fun <reified T: Any?> FlowContent.InputComp(
 ) {
     val state: FormState<*> = locate()
 
-    launch {
-        input.valueAttr.drop(1).collectLatest {
-            input.touch()
-            state.validateTouched()
-        }
-    }
+    touchAndValidate(state, input)
 
     div("w-full px-3 mb-6 $wrapperClasses") {
         label("block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") {
@@ -395,12 +388,7 @@ fun FlowContent.CheckBoxComp(
 ) {
     val state: FormState<*> = locate()
 
-    launch {
-        input.valueAttr.drop(1).collectLatest {
-            input.touch()
-            state.validateTouched()
-        }
-    }
+    touchAndValidate(state, input)
 
     div("flex items-start") {
         if (text != null) {
@@ -416,6 +404,9 @@ fun FlowContent.CheckBoxComp(
 
                 attributeOf("checked", input.valueAttr) { value ->
                     value.toString()
+                }
+                onChange {
+                    input.valueAttr.value = it.target!!.getProp("checked")
                 }
             }
         }

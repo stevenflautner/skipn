@@ -5,7 +5,7 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 // TODO THERE'S A LOT OF BS IN HERE
 //  API ELEMS SHOULD NOT BE ELEMENT RELATED
-actual open class BrowserElement(val domElem: Element) {
+actual open class BrowserElement(val domElem: Element) : BrowserAny(domElem) {
 
     actual fun setClasses(classes: String) {
         domElem.className = classes

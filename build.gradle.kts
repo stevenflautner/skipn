@@ -1,12 +1,12 @@
 import java.util.*
 
 plugins {
-    kotlin("multiplatform") version "1.4.21"
+    kotlin("multiplatform") version "1.4.30-RC"
     id("maven-publish")
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.99591"
+version = "0.0.99593_9"
 val kversion = "1.4.2"
 
 repositories {
@@ -35,6 +35,7 @@ kotlin {
                 }
             }
         }
+//        useCommonJs()
     }
     sourceSets {
         val commonMain by getting {
@@ -42,9 +43,9 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kversion")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
-                implementation("io.ktor:ktor-client-core:$kversion")
-                implementation("io.ktor:ktor-client-json:$kversion")
-                implementation("io.ktor:ktor-client-serialization:$kversion")
+//                implementation("io.ktor:ktor-client-core:$kversion")
+//                implementation("io.ktor:ktor-client-json:$kversion")
+//                implementation("io.ktor:ktor-client-serialization:$kversion")
 //                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
             }
@@ -56,10 +57,15 @@ kotlin {
             }
         }
         val jvmMain by getting {
+            val ktorVersion = "1.5.1"
             dependencies {
-                implementation("io.ktor:ktor-server-netty:$kversion")
+                implementation("io.ktor:ktor-server-netty:$ktorVersion")
 //                implementation("io.ktor:ktor-html-builder:$kversion")
-                implementation("io.ktor:ktor-serialization:$kversion")
+                implementation("io.ktor:ktor-serialization:$ktorVersion")
+
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-json:$ktorVersion")
+                implementation("io.ktor:ktor-client-serialization:$ktorVersion")
             }
         }
         val jvmTest by getting {
@@ -69,6 +75,8 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+
+                implementation(npm("morphdom", "2.6.1"))
 //                implementation(devNpm("postcss-loader", "4.0.0"))
 //                implementation(devNpm("postcss", "7.0.32"))
 //                implementation(devNpm("raw-loader", ""))

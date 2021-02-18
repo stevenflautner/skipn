@@ -18,14 +18,17 @@ import io.skipn.form.FormValidator
 ////}
 //
 //
-actual abstract class EndpointBase<REQ : Any, RESP : Any> {
+actual abstract class EndpointBase<REQ : Any, RESP : Any>
+    actual constructor(
+        actual val cookies: List<String>?
+    ) {
 
     val route = parseApiRoute(this)
     lateinit var implementedFunc: suspend ApplicationCall.(REQ) -> RESP
 
 }
 
-inline fun <reified REQ: Any, RESP: Any> Routing.endpoint(
+inline fun <reified REQ: Any, reified RESP: Any> Routing.endpoint(
     endpoint: Endpoint<REQ, RESP>,
     noinline func: suspend ApplicationCall.(REQ) -> RESP
 ) {
@@ -56,7 +59,7 @@ inline fun <reified REQ: Any, RESP: Any> Routing.endpoint(
     println("Endpoint serving at ${endpoint.route}")
 }
 
-inline fun <reified REQ: Any, RESP: Any> Routing.formEndpoint(
+inline fun <reified REQ: Any, reified RESP: Any> Routing.formEndpoint(
     endpoint: FormEndpoint<REQ, RESP>,
     noinline func: suspend ApplicationCall.(REQ) -> RESP
 ) {

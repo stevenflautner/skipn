@@ -16,6 +16,15 @@ class ClassesBuilder {
     }
 
     fun build(): String {
+        return toString()
+    }
+
+    inline fun toggle(classes: String, predicate: () -> Boolean) {
+        if (predicate())
+            +classes
+    }
+
+    override fun toString(): String {
         return classes
     }
 }

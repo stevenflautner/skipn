@@ -2,7 +2,7 @@ package io.skipn.browser
 
 import io.skipn.errors.BrowserOnlyFunction
 
-actual open class BrowserElement {
+actual open class BrowserElement : BrowserAny() {
     actual fun setClasses(classes: String) {
         throw BrowserOnlyFunction
     }

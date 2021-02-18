@@ -1,8 +1,5 @@
 package io.skipn
 
-import io.ktor.client.call.*
-import io.ktor.client.statement.*
-import io.skipn.actions.routePage
 import io.skipn.utils.byId
 import kotlinx.html.*
 import io.skipn.builder.BuildContext
@@ -35,18 +32,6 @@ object Skipn {
 
     lateinit var errorSerializer: ErrorSerializer<Exception>
 
-    inline fun <reified T: Exception> errorSerializer() {
-        errorSerializer = {
-            println(it)
-            val a =Json.decodeFromString<T>(it)
-            println("ERRRRRRR")
-            println(T::class)
-            println(a)
-            a
-//            it.receive<T>()
-        }
-    }
-
     fun initialize(app: HtmlApp.() -> Unit) {
         createSkipnContext { skipnContext ->
             context = skipnContext
@@ -54,7 +39,8 @@ object Skipn {
             DEV = byId("skipn-main-script").getAttribute("data-dev") == "true"
 
             window.onpopstate = {
-                context.router.changeRoute(window.location.href)
+                val route = "${window.location.pathname}${window.location.search}"
+                context.router.changeRoute(route)
             }
 
             val rootBuildContext = BuildContext.createRoot(skipnContext)
@@ -79,7 +65,7 @@ object Skipn {
     }
 }
 
-internal fun ensureRunAfterInitialization(body: () -> Unit) {
+fun ensureRunAfterInitialization(body: () -> Unit) {
     if (Skipn.context.isInitializing) {
         Skipn.runAfterInitialized!!.add(body)
         return

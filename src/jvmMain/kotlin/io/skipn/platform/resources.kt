@@ -1,5 +1,6 @@
 package io.skipn.platform
 
+import io.skipn.utils.encodeToStringStatic
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement

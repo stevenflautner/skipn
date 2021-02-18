@@ -22,6 +22,6 @@ actual fun changeParameter(key: String, parameter: String) {
 
 internal actual fun updateUrlParameter(parameters: String) {
     val route = if (parameters.isEmpty()) window.location.pathname
-    else window.location.pathname + "?$parameters"
+    else window.location.pathname + "?${parameters.removePrefix("&")}"
     window.history.pushState(null, route, route)
 }

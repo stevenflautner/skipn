@@ -4,17 +4,17 @@ import io.skipn.SkipnContext
 import io.skipn.errors.BrowserOnlyFunction
 import io.skipn.provide.PinningContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 actual class BuildContext(
         id: String,
         skipnContext: SkipnContext,
         pinningContext: PinningContext,
-        internal var routeLevel: Int
+        internal var routeLevel: Int,
+        private val coroutineScope: CoroutineScope,
 ) : BuildContextBase(id, skipnContext, pinningContext) {
 
-    actual fun getCoroutineScope(): CoroutineScope {
-        throw BrowserOnlyFunction
-    }
+    actual fun getCoroutineScope() = coroutineScope
 
     companion object {
         fun createRoot(skipnContext: SkipnContext): BuildContext {
@@ -22,7 +22,8 @@ actual class BuildContext(
                 "skipn-root",
                 skipnContext,
                 PinningContext(parent = null),
-                0
+                0,
+                CoroutineScope(SupervisorJob())
             )
         }
     }

@@ -1,7 +1,6 @@
 package io.skipn.ktor
 
 import io.ktor.application.*
-import io.ktor.client.features.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -11,6 +10,7 @@ import io.ktor.serialization.*
 import io.skipn.ErrorFilter
 import io.skipn.errors.ApiError
 import io.skipn.html.HtmlApp
+import io.skipn.platform.DEV
 import io.skipn.utils.buildApiJson
 import java.util.concurrent.TimeUnit
 
@@ -82,11 +82,20 @@ fun Application.Skipn(
         method(HttpMethod.Delete)
         method(HttpMethod.Options)
 //        host("localhost:8080")
-        anyHost()
+        if (DEV) {
+            host("localhost:8080")
+        } else {
+            anyHost()
+        }
+        allowCredentials = true
         header(HttpHeaders.AccessControlAllowOrigin)
         header(HttpHeaders.ContentType)
         exposeHeader(HttpHeaders.ContentType)
         exposeHeader(HttpHeaders.AccessControlAllowOrigin)
+//        if (DEV) {
+//        }
+        header(HttpHeaders.AccessControlAllowCredentials)
+        exposeHeader(HttpHeaders.AccessControlAllowCredentials)
 
     }
     install(Compression) {

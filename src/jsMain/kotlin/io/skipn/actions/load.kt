@@ -1,16 +1,18 @@
 package io.skipn.actions
 
-import io.ktor.client.request.*
-import io.ktor.http.*
+import Api
 import io.skipn.Endpoint
-import io.skipn.platform.DEV
+import io.skipn.EndpointBase
 import io.skipn.SkipnContext
-import io.skipn.api
 import io.skipn.errors.ApiError
+import io.skipn.platform.Cookies
+import io.skipn.platform.DEV
+import io.skipn.utils.encodeToStringStatic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.json.Json
 
 actual inline fun <reified RESP : Any> loader(
     skipnContext: SkipnContext,
@@ -42,12 +44,13 @@ actual class LoadTask<RESP : Any> actual constructor(
     private var job: Job? = null
 
     actual fun execute(onSuccess: ResponseSuccess<RESP>, onFailure: ResponseFailure) {
-        try {
-            job = GlobalScope.launch {
-                onSuccess(load())
+        job = GlobalScope.launch {
+            try {
+                val load = load()
+                onSuccess(load)
+            } catch (e: ApiError) {
+                onFailure(e)
             }
-        } catch (e: ApiError) {
-            onFailure(e)
         }
     }
 
@@ -62,9 +65,40 @@ actual inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
         endpoint: Endpoint<REQ, RESP>,
         request: REQ
 ): suspend () -> RESP = {
-    api.post(endpoint.route) {
-        contentType(ContentType.Application.Json)
+    Api.post(
+        endpoint,
+        body = Json.encodeToStringStatic(request),
+        headers = {
+            set("Content-Type", "application/json")
+        },
+    )
+}
 
-        body = request
+@OptIn(InternalSerializationApi::class)
+actual inline fun <reified REQ : Any, reified RESP : Any> browserPost(
+    endpoint: Endpoint<REQ, RESP>,
+    request: REQ
+): suspend () -> RESP = {
+    Api.post(
+        endpoint,
+        body = Json.encodeToStringStatic(request),
+        headers = {
+            set("Content-Type", "application/json")
+        },
+    )
+}
+
+fun EndpointBase<*, *>.getCookieString(): String? {
+    cookies?.let { cookieNames ->
+        val browserCookies = Cookies.getAll()
+        val cookieString = StringBuilder()
+
+        cookieNames.forEach { cookieName ->
+            browserCookies[cookieName]?.let {
+                cookieString.append(" $it;")
+            }
+        }
+        return cookieString.toString()
     }
+    return null
 }

@@ -3,32 +3,39 @@ package io.skipn.builder
 import io.skipn.html.JSDOMBuilder
 import io.skipn.html.SkipnInitializationBuilder
 import kotlinx.html.FlowContent
+import kotlinx.html.FlowOrMetaDataOrPhrasingContent
+import kotlinx.html.TagConsumer
 import kotlinx.html.consumers.DelayedConsumer
 import kotlinx.html.consumers.FinalizeConsumer
 
 actual val FlowContent.builder: Builder
-    get() {
-        var consumer = consumer
+    get() = getBuilder(consumer)
 
-        // Dynamically built tree
+val FlowOrMetaDataOrPhrasingContent.builder: Builder
+    get() = getBuilder(consumer)
+
+private fun getBuilder(_consumer: TagConsumer<*>): Builder {
+    var consumer = _consumer
+
+    // Dynamically built tree
+    if (consumer is JSDOMBuilder)
+        return consumer
+    if (consumer is FinalizeConsumer<*, *>) {
+        consumer = consumer.downstream
         if (consumer is JSDOMBuilder)
             return consumer
-        if (consumer is FinalizeConsumer<*, *>) {
-            consumer = consumer.downstream
-            if (consumer is JSDOMBuilder)
-                return consumer
-        }
-
-        // Server preloaded tree
-        if (consumer is DelayedConsumer) {
-            consumer = consumer.downstream
-            if (consumer is SkipnInitializationBuilder) {
-                return consumer
-            }
-        }
-
-        throw Exception("Builder could not be found while building in the browser")
     }
+
+    // Server preloaded tree
+    if (consumer is DelayedConsumer) {
+        consumer = consumer.downstream
+        if (consumer is SkipnInitializationBuilder) {
+            return consumer
+        }
+    }
+
+    throw Exception("Builder could not be found while building in the browser")
+}
 
 actual interface Builder {
     actual val rootBuildContext: BuildContext

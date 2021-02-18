@@ -40,33 +40,3 @@ actual fun FlowContent.router(node: DIV.(String?) -> Unit) {
         }
     }
 }
-
-@HtmlTagMarker
-actual fun FlowContent.parameter(key: String, node: DIV.(String?) -> Unit) {
-    div {
-        var element = prepareElement()
-        val parentContext = buildContext
-        val parentScope = parentContext.getCoroutineScope()
-
-        val route = skipnContext.router.getParameterValue(key)
-
-        // Creates a new Build Context
-        // as a copy of the current one
-        val context = builder.createContextAndDescend(element.id)
-
-        // Run node first
-        node(route)
-
-        // Listen for changes of current route level
-        parentScope.launch {
-            skipnContext.router.filterParameterChangesFor(key).collect { change ->
-                context.cancelAndCreateScope(parentScope)
-                context.getCoroutineScope().launch {
-                    element = replaceElement(element, context) {
-                        node(change)
-                    }
-                }
-            }
-        }
-    }
-}

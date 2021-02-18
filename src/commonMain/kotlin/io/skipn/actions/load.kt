@@ -83,6 +83,11 @@ expect inline fun <reified REQ : Any, reified RESP : Any> endpointFunc(
     request: REQ
 ) : suspend () -> RESP
 
+expect inline fun <reified REQ : Any, reified RESP : Any> browserPost(
+    endpoint: Endpoint<REQ, RESP>,
+    request: REQ
+) : suspend () -> RESP
+
 expect class LoadTask<RESP : Any>(
     load: suspend () -> RESP,
 ) {
@@ -101,6 +106,10 @@ inline fun <reified REQ: Any, reified RESP: Any> BuildContext.load(
 
 inline fun <reified REQ: Any, reified RESP: Any> Endpoint<REQ, RESP>.request(request: REQ, context: BuildContext): Response<RESP> {
     return context.load(this, request)
+}
+
+suspend inline fun <reified REQ: Any, reified RESP: Any> Endpoint<REQ, RESP>.requestSuspend(request: REQ): RESP {
+    return browserPost(this, request).invoke()
 }
 
 //class LoadBuilder<REQ: Any, RESP: Any>(private val endpoint: Endpoint<REQ, RESP>) {

@@ -6,10 +6,13 @@ import io.skipn.builder.builder
 import io.skipn.html.create
 import io.skipn.prepareElement
 import kotlinx.browser.document
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.html.*
+import morphdom.MorphDomOptions
+import morphdom.morphdom
 import org.w3c.dom.Element
+import org.w3c.dom.HTMLElement
 
 @HtmlTagMarker
 actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T) {
@@ -80,15 +83,45 @@ actual fun FlowContent.divOf(
     }
 }
 
+//val d = io.skipn.utils.require_("morphdom.morphdom")
+//val morphdom = js("require('morphdom')")
+
 fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
     val newElement = document.create(context).div {
         id = element.id
 
         node()
     }
+//    println("DOMM")
+//    println(element.classList)
+//    println(element.classList.value)
+//    println("DOMM1")
+//    println(newElement.classList)
+//    println(newElement.classList.value)
+//    d(element, newElement)
+//    morphdom(element, newElement, options = object : MorphDomOptions {
+//        override var childrenOnly: Boolean? = false
+////        override var onBeforeElUpdated: ((fromEl: HTMLElement, toEl: HTMLElement) -> Boolean)? = { fromEl, toEl ->
+////            // spec - https://dom.spec.whatwg.org/#concept-node-equals
+////            !fromEl.isEqualNode(toEl)
+////        }
+//    })
+
+
     element.replaceWith(newElement)
     return newElement
+//    return morphdom(element, newElement) as? Element ?: throw Exception("MORPHDOM FAILED TO RETURN ELEMENT")
 }
+
+//fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit): Element {
+//    val newElement = document.create(context).div {
+//        id = element.id
+//
+//        node()
+//    }
+//    element.replaceWith(newElement)
+//    return newElement
+//}
 
 @HtmlTagMarker
 actual fun <T> FlowContent.divOf(flow: Flow<T>, initialValue: T, node: DIV.(T) -> Unit) {

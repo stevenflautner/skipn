@@ -1,7 +1,5 @@
 package io.skipn.events
 
-import io.skipn.form.FormState
-import io.skipn.Endpoint
 import io.skipn.FormEndpoint
 import io.skipn.browser.BrowserElement
 import io.skipn.form.FormBuilder
@@ -13,7 +11,7 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
     prepareElement()
 }
 
-actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((Event) -> Unit)?) {
+actual fun FlowContent.onClick(ignoreChildren: Boolean, onClick: ((BrowserEvent) -> Unit)?) {
     if (onClick == null) return
     prepareElement()
 }
@@ -49,5 +47,9 @@ actual fun FlowContent.onScroll(onScroll: (BrowserElement) -> Unit) {
 }
 
 actual fun FlowContent.onKeyUp(onKeyUp: (String) -> Unit) {
+    prepareElement()
+}
+
+actual fun FlowContent.onChange(onChange: (BrowserEvent) -> Unit) {
     prepareElement()
 }

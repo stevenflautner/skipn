@@ -87,29 +87,30 @@ suspend inline fun <reified T: Any> ApplicationCall.parseMultipart(): Map<String
                     }
                 }
             }
-            is PartData.FileItem -> {
-                val outputStream = ByteArrayOutputStream()
-                part.streamProvider().use { input ->
-                    outputStream.use { output ->
-                        input.copyTo(output)
-                    }
-                }
-
-                val bytes = outputStream.toByteArray()
-                if (bytes.isNotEmpty()) {
-                    // Handle multiple files uploaded with same input name
-                    val files = data[part.name!!] as? FileList
-                        ?: run {
-                            val files = FileList()
-                            data[part.name!!] = files
-                            files
-                        }
-                    files.add(FileData(
-                        bytes,
-                        part.contentType
-                    ))
-                }
-            }
+            // TODO HANDLE FILES UPLOADED THIS UNCOMMENTED AND CONTENT TyPE IN COMMON
+//            is PartData.FileItem -> {
+//                val outputStream = ByteArrayOutputStream()
+//                part.streamProvider().use { input ->
+//                    outputStream.use { output ->
+//                        input.copyTo(output)
+//                    }
+//                }
+//
+//                val bytes = outputStream.toByteArray()
+//                if (bytes.isNotEmpty()) {
+//                    // Handle multiple files uploaded with same input name
+//                    val files = data[part.name!!] as? FileList
+//                        ?: run {
+//                            val files = FileList()
+//                            data[part.name!!] = files
+//                            files
+//                        }
+//                    files.add(FileData(
+//                        bytes,
+//                        part.contentType
+//                    ))
+//                }
+//            }
         }
         part.dispose()
     }
