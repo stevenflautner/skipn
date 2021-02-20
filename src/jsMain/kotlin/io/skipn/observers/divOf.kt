@@ -35,9 +35,7 @@ actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T)
             // It's possible that by the time this coroutine runs,
             // the current value of the stateflow changed.
             // Then don't drop the first value
-            val drop = if (currentValue == stateFlow.value) 1 else 0
-
-            stateFlow.drop(drop).collect { value ->
+            stateFlow.drop(stateFlow.dropCount(currentValue)).collect { value ->
                 context.cancelAndCreateScope(parentScope)
                 context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {
@@ -62,16 +60,17 @@ actual fun FlowContent.divOf(
         // as a copy of the current one
         val context = builder.createContextAndDescend(element.id)
 
+        val oldValue = flow.valueOrNull()
+
         // Run node first
         node()
 
         // Listen for changes and ignore
         // first value emitted
         parentScope.launch {
-            val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
             // Drop all values in the replay cache
             // So we only notify newly emitted values
-            flow.drop(drop).collect {
+            flow.drop(flow.dropCount(oldValue)).collect {
                 context.cancelAndCreateScope(parentScope)
                 context.getCoroutineScope().launch {
                     element = replaceElement(element, context) {

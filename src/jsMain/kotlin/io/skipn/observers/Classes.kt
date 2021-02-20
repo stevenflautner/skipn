@@ -34,12 +34,25 @@ actual fun <T> FlowContent.attributeOf(
     updateElement(element, name, value(stateFlow.value))
 
     // TODO POSSIBLE THE VALUE CHANGED BETWEEN THE TWO WHEN LAUNCH HAPPENS
+    val oldValue = stateFlow.valueOrNull()
     launch {
-        stateFlow.drop(0).collect {
+        stateFlow.drop(stateFlow.dropCount(oldValue)).collect {
             // TODO CHANGE THIS TO VALUEOF
             updateElement(element, name, value(stateFlow.value))
         }
     }
+}
+
+fun Flow<*>.valueOrNull(): Any? {
+    return if (this is SharedFlow) {
+        replayCache.firstOrNull()
+    } else null
+}
+
+fun <T> Flow<T>.dropCount(oldValue: T): Int {
+    return if (oldValue == valueOrNull())
+        (this as? SharedFlow)?.replayCache?.size ?: 0
+    else 0
 }
 
 actual fun <T> FlowContent.attributeOf(
@@ -52,12 +65,10 @@ actual fun <T> FlowContent.attributeOf(
     // TODO CHANGE THIS TO VALUEOF
     updateElement(element, name, value())
 
+    val oldValue = flow.valueOrNull()
+
     launch {
-//        val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
-        // Drop all values in the replay cache
-        // So we only notify newly emitted values
-        // TODO POSSIBLE THE VALUE CHANGED BETWEEN THE TWO WHEN LAUNCH HAPPENS
-        flow.drop(0).collect {
+        flow.drop(flow.dropCount(oldValue)).collect {
             updateElement(element, name, value())
         }
     }
