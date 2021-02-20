@@ -139,7 +139,11 @@ private fun <T: HTMLTag> collectChangesAndRebuild(
 
                         println(JSON.stringify(vNode))
                         println(JSON.stringify(newVNode))
-                        vNode = Snabbdom.patch(vNode.elm, newVNode)
+                        val parent = vNode.elm
+                        vNode = Snabbdom.patch(vNode, newVNode).also { new ->
+                            new.elm = parent
+                        }
+
                     }
                 }
             }
