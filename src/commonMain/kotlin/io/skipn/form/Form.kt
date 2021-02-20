@@ -3,12 +3,11 @@ package io.skipn.form
 import io.skipn.FileData
 import io.skipn.FormEndpoint
 import io.skipn.builder.launch
+import io.skipn.builders.classes
 import io.skipn.elements.DomElement
 import io.skipn.events.*
 import io.skipn.form.InputField.Companion.convertType
-import io.skipn.observers.attributeOf
-import io.skipn.observers.classesOf
-import io.skipn.observers.divOf
+import io.skipn.observers.dependOn
 import io.skipn.provide.locate
 import io.skipn.provide.pin
 import kotlinx.coroutines.flow.*
@@ -312,8 +311,8 @@ inline fun <reified RESP: Any> FlowContent.Form(
             body()
         }
 
-        divOf(state.error) { msg ->
-            if (msg == null) return@divOf
+        div {
+            val msg = dependOn { state.error } ?: return@div
             p("text-red-500 text-sm italic px-2 pt-2") {
                 +msg
             }
@@ -348,13 +347,16 @@ inline fun <reified T: Any?> FlowContent.InputComp(
             +label
         }
         input(name = input.name, type = type) {
+            val error = dependOn { input.error }
+            val value = dependOn { input.valueAttr }
+
             this.placeholder = placeholder
 
             list?.let {
                 this.list = it
             }
 
-            classesOf(input.error) { error ->
+            classes {
                 +"appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
                 if (error != null)
                     +"border-red-500"
@@ -362,9 +364,8 @@ inline fun <reified T: Any?> FlowContent.InputComp(
                     +"border-gray-400"
             }
 
-            attributeOf("value", input.valueAttr) { value ->
-                value?.toString() ?: ""
-            }
+            this.value = value?.toString() ?: ""
+
 //            onMounted { elem ->
 //                input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
 //            }
@@ -372,8 +373,8 @@ inline fun <reified T: Any?> FlowContent.InputComp(
                 input.valueAttr.value = InputField.convertValue(elem.getAttribute("value") ?: "")
             }
         }
-        divOf(input.error) { msg ->
-            if (msg == null) return@divOf
+        div {
+            val msg = dependOn { input.error } ?: return@div
             p("text-red-500 text-xs italic") {
                 +msg
             }
@@ -399,12 +400,13 @@ fun FlowContent.CheckBoxComp(
 
         div("flex items-center h-5") {
             input(classes = "focus:ring-green-500 h-5 w-5 text-green-500 border-gray-300 rounded") {
+                val value = dependOn { input.valueAttr }
+
                 name = input.name
                 type = InputType.checkBox
 
-                attributeOf("checked", input.valueAttr) { value ->
-                    value.toString()
-                }
+                this.value = value?.toString() ?: ""
+
                 onChange {
                     input.valueAttr.value = it.target!!.getProp("checked")
                 }
@@ -421,8 +423,8 @@ fun FlowContent.CheckBoxComp(
             }
         }
     }
-    divOf(input.error) { msg ->
-        if (msg == null) return@divOf
+    div {
+        val msg = dependOn { input.error } ?: return@div
         p("text-red-500 text-xs italic") {
             +msg
         }

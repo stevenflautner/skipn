@@ -158,7 +158,8 @@ fun VNode.removeAttr(name: String) {
     val data = this.data ?: return
     val attrs = data.attrs ?: return
 //    attrs[name] = value
-    js("delete attrs[name]")
+    println("REMOVE ATTRIBUTE SHOULD BE HANDLED")
+//    js("delete attrs[name]")
 }
 //fun VNode.changeAttr(name: String, value: String?) {
 //    data!!.attrs!![name] = value
@@ -190,7 +191,7 @@ fun VNode.addChild(vNode: VNode) {
 //    this.children = arrayOf(vNode)
 //    children.add(vNode)
 }
-fun VNode.addHook(key: String, hook: (dynamic) -> Unit) {
+fun VNode.addHook(key: String, hook: (dynamic, dynamic) -> Unit) {
     val data = getData()
     val hooks: dynamic = data.hook ?: object {}.also { data.hook = it }
     hooks[key] = hook

@@ -10,8 +10,14 @@ import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
 fun <T> HTMLTag.dependOn(stateFlow: () -> StateFlow<T>): T {
-    val flow = dependOn(stateFlow as () -> Flow<T>)
+    val flow = internalDependOn(stateFlow)
     return (flow as StateFlow<T>).value
 }
 
-expect fun <T> HTMLTag.dependOn(flow: () -> Flow<T>): Flow<T>
+expect fun <T> HTMLTag.internalDependOn(flow: () -> Flow<T>): Flow<T>
+
+expect fun HTMLTag.dependOnRoute(): String?
+
+fun <T> HTMLTag.dependOn(flow: () -> Flow<T>) {
+    internalDependOn(flow)
+}

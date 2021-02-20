@@ -21,11 +21,11 @@ fun Tag.getUnderlyingHtmlElement(): VNode {
 }
 
 fun Tag.prepareElement(): VNode {
-    val context = skipnContext
+//    val context = skipnContext
 
-    val id = attributes["id"] ?: context.points.generateId().also {
-        attributes["id"] = it
-    }
+//    val id = attributes["id"] ?: context.points.generateId().also {
+//        attributes["id"] = it
+//    }
 
     return getUnderlyingHtmlElement()
 

@@ -41,9 +41,9 @@ actual fun FlowContent.onMounted(onMounted: (BrowserElement) -> Unit) {
 //    val element = prepareElement()
     val vNode = getUnderlyingHtmlElement()
 
-    vNode.addHook("insert") {
-        onMounted(BrowserElement(it.elm as Element))
-    }
+//    vNode.addHook("insert") {
+//        onMounted(BrowserElement(it.elm as Element))
+//    }
 
 //    if (skipnContext.isInitializing) {
 //        onMounted(BrowserElement(element))
@@ -166,9 +166,9 @@ actual fun FlowContent.onDispose(onDispose: (BrowserElement) -> Unit) {
     val vNode = prepareElement()
 //    elem as GlobalEventHandlers
 
-    vNode.addHook("destroy") {
-        onDispose(BrowserElement(it.elm as Element))
-    }
+//    vNode.addHook("destroy") {
+//        onDispose(BrowserElement(it.elm as Element))
+//    }
 
 //    launch {
 //        try {

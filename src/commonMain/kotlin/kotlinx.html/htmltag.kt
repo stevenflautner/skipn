@@ -27,6 +27,7 @@ open class HTMLTag(
     var depId = 0
     private var _dependencies: ArrayList<Any>? = null
     var dependenciesBuilt: Boolean = false
+    var buildContextBuilt: Boolean = false
 
     fun addDependency(flow: Flow<*>) {
         val dependencies = _dependencies ?: arrayListOf<Any>().also { _dependencies = it }

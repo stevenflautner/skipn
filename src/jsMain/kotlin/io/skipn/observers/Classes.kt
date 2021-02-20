@@ -26,43 +26,43 @@ private fun updateElement(vNode: VNode, name: String, value: String) {
 //    }
 }
 
-actual fun <T> FlowContent.attributeOf(
-    name: String,
-    stateFlow: StateFlow<T>,
-    value: (T) -> String
-) {
-    val vNode = prepareElement()
-
-    updateElement(vNode, name, value(stateFlow.value))
-
-    launch {
-        stateFlow.drop(1).collect {
-            // TODO CHANGE THIS TO VALUEOF
-            updateElement(vNode, name, value(stateFlow.value))
-        }
-    }
-}
-
-actual fun <T> FlowContent.attributeOf(
-    name: String,
-    flow: Flow<T>,
-    value: () -> String
-) {
-    val element = prepareElement()
-
-    // TODO CHANGE THIS TO VALUEOF
-    updateElement(element, name, value())
-
-    launch {
-        val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
-        // Drop all values in the replay cache
-        // So we only notify newly emitted values
-        flow.drop(drop).collect {
-            updateElement(element, name, value())
-        }
-    }
-}
-
-actual fun <T> FlowContent.attributeOf(name: String, flow: Flow<T>, initialValue: T, value: (T) -> String) {
-    attributeOf(name, flow.stateIn(buildContext.getCoroutineScope(), SharingStarted.Eagerly, initialValue), value)
-}
+//actual fun <T> FlowContent.attributeOf(
+//    name: String,
+//    stateFlow: StateFlow<T>,
+//    value: (T) -> String
+//) {
+//    val vNode = prepareElement()
+//
+//    updateElement(vNode, name, value(stateFlow.value))
+//
+//    launch {
+//        stateFlow.drop(1).collect {
+//            // TODO CHANGE THIS TO VALUEOF
+//            updateElement(vNode, name, value(stateFlow.value))
+//        }
+//    }
+//}
+//
+//actual fun <T> FlowContent.attributeOf(
+//    name: String,
+//    flow: Flow<T>,
+//    value: () -> String
+//) {
+//    val element = prepareElement()
+//
+//    // TODO CHANGE THIS TO VALUEOF
+//    updateElement(element, name, value())
+//
+//    launch {
+//        val drop = (flow as? SharedFlow)?.replayCache?.size ?: 0
+//        // Drop all values in the replay cache
+//        // So we only notify newly emitted values
+//        flow.drop(drop).collect {
+//            updateElement(element, name, value())
+//        }
+//    }
+//}
+//
+//actual fun <T> FlowContent.attributeOf(name: String, flow: Flow<T>, initialValue: T, value: (T) -> String) {
+//    attributeOf(name, flow.stateIn(buildContext.getCoroutineScope(), SharingStarted.Eagerly, initialValue), value)
+//}

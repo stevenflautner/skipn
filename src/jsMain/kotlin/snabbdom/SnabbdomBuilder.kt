@@ -46,9 +46,10 @@ class SnabbdomBuilder<out R : VNode>(
     private fun setProperties(vNode: VNode, key: String, value: String?) {
         if (key == CLASS_ATTR) {
             if (value == null)
-                vNode.removeClasses()
+                vNode.removeAttr(CLASS_ATTR)
+//                vNode.removeClasses()
             else {
-                vNode.addAttr("class", value)
+                vNode.addAttr(CLASS_ATTR, value)
 //                value.split(" ").forEach {
 //                    vNode.addClass(it)
 //                }
@@ -93,6 +94,10 @@ class SnabbdomBuilder<out R : VNode>(
     override fun onTagContent(content: CharSequence) {
         if (path.isEmpty()) {
             throw IllegalStateException("No current DOM node")
+        }
+
+        if (path.last().text != null) {
+            println("CONTENT AND CHILD ")
         }
 
         path.last().text = content.toString()
