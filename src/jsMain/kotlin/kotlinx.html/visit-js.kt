@@ -102,49 +102,29 @@ private fun <T: HTMLTag> collectChangesAndRebuild(
             else 0
             // Drop all values in the replay cache
             // So we only notify newly emitted values
-            // TODO BY THE TIME WE DROP VALUES MIGHT HAVE CHANGED
-            //  WE SHOULD DO AN EQUALITY CHECK
             flow.drop(drop).collectLatest {
-                if (vNode.elm == null) {
-                    vNode.addHook("insert") { _, _ ->
-                        context.cancelAndCreateScope(parentScope)
+                context.cancelAndCreateScope(parentScope)
 
-                        context.launch {
-                            val newVNode = buildVDom(context).let { newConsumer ->
-                                tag.depId = 0
-                                tag.consumer = newConsumer
-                                tag.visitAndFinalize(newConsumer, block)
-                            }
-                            println("TESS1")
-                            println(JSON.stringify(vNode))
-                            println(JSON.stringify(newVNode))
-                            vNode = Snabbdom.patch(vNode, newVNode)
-                        }
+                context.launch {
+                    val newVNode = buildVDom(context).let { newConsumer ->
+                        tag.depId = 0
+                        tag.consumer = newConsumer
+                        tag.visitAndFinalize(newConsumer, block)
                     }
-                } else {
-                    context.cancelAndCreateScope(parentScope)
+                    println("TESS")
+                    println(vNode.elm?.parentElement)
+                    println(vNode.elm?.parentNode)
+                    println(vNode.elm?.parentNode == null)
 
-                    context.launch {
-                        val newVNode = buildVDom(context).let { newConsumer ->
-                            tag.depId = 0
-                            tag.consumer = newConsumer
-                            tag.visitAndFinalize(newConsumer, block)
-                        }
-                        println("TESS")
-                        println(vNode.elm?.parentElement)
-                        println(vNode.elm?.parentNode)
-                        println(vNode.elm?.parentNode == null)
+                    // Its possible that the new vnode's child is not the one that was patched right.
 
-                        // Its possible that the new vnode's child is not the one that was patched right.
-
-                        println(JSON.stringify(vNode))
-                        println(JSON.stringify(newVNode))
-                        val parent = vNode.elm
-                        vNode = Snabbdom.patch(vNode, newVNode).also { new ->
-                            new.elm = parent
-                        }
-
+                    println(JSON.stringify(vNode))
+                    println(JSON.stringify(newVNode))
+                    val parent = vNode.elm
+                    vNode = Snabbdom.patch(vNode, newVNode).also { new ->
+                        new.elm = parent
                     }
+
                 }
             }
         }
