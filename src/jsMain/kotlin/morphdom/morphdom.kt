@@ -39,7 +39,7 @@ external interface MorphDomOptions {
 
 @JsModule("morphdom/dist/morphdom-umd.js")
 @JsNonModule
-external fun morphdom(fromNode: Node, toNode: Node, options: MorphDomOptions = definedExternally)
+external fun morphdom(fromNode: Node, toNode: Node, options: MorphDomOptions = definedExternally): Node
 
 @JsModule("morphdom/dist/morphdom-umd.js")
 @JsNonModule

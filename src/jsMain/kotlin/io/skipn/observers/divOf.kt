@@ -98,13 +98,13 @@ fun replaceElement(element: Element, context: BuildContext, node: DIV.() -> Unit
 //    println(newElement.classList)
 //    println(newElement.classList.value)
 //    d(element, newElement)
-//    morphdom(element, newElement, options = object : MorphDomOptions {
+//    return morphdom(element, newElement, options = object : MorphDomOptions {
 //        override var childrenOnly: Boolean? = false
-////        override var onBeforeElUpdated: ((fromEl: HTMLElement, toEl: HTMLElement) -> Boolean)? = { fromEl, toEl ->
-////            // spec - https://dom.spec.whatwg.org/#concept-node-equals
-////            !fromEl.isEqualNode(toEl)
-////        }
-//    })
+//        override var onBeforeElUpdated: ((fromEl: HTMLElement, toEl: HTMLElement) -> Boolean)? = { fromEl, toEl ->
+//            // spec - https://dom.spec.whatwg.org/#concept-node-equals
+//            !fromEl.isEqualNode(toEl)
+//        }
+//    }) as Element
 
 
     element.replaceWith(newElement)
