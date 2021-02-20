@@ -26,7 +26,7 @@ kotlin {
         }
         withJava()
     }
-    js(IR) {
+    js(LEGACY) {
         browser {
             testTask {
                 useKarma {

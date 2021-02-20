@@ -33,7 +33,6 @@ actual fun <T> FlowContent.attributeOf(
 
     updateElement(element, name, value(stateFlow.value))
 
-    // TODO POSSIBLE THE VALUE CHANGED BETWEEN THE TWO WHEN LAUNCH HAPPENS
     val oldValue = stateFlow.valueOrNull()
     launch {
         stateFlow.drop(stateFlow.dropCount(oldValue)).collect {
