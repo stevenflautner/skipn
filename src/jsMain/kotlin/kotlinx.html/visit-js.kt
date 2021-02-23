@@ -85,12 +85,14 @@ private fun <T: HTMLTag> collectChangesAndRebuild(
     var vNode = tag.getUnderlyingHtmlElement()
     val context = tag.buildContext
 
-    vNode.addHook("postpatch") { old, new ->
-        println("DID THIS GET CALLED?hhea?")
-        println(old)
-        println(new)
-//        println(new as VNode)
-        vNode = new as VNode
+    var rootVNode: VNode? = null
+
+    vNode.addHook("prepatch") { old, new ->
+        rootVNode = new as VNode
+    }
+
+    vNode.addHook("init") { new, _ ->
+        rootVNode = new as VNode
     }
 
     deps.forEach { flow ->
@@ -111,19 +113,34 @@ private fun <T: HTMLTag> collectChangesAndRebuild(
                         tag.consumer = newConsumer
                         tag.visitAndFinalize(newConsumer, block)
                     }
-                    println("TESS")
-                    println(vNode.elm?.parentElement)
-                    println(vNode.elm?.parentNode)
-                    println(vNode.elm?.parentNode == null)
+
+                    newVNode.addHook("postpatch") { old, new ->
+                        new as VNode
+
+                        rootVNode!!.elm = new.elm
+                        rootVNode!!.data = new.data
+                        rootVNode!!.children = new.children
+                        rootVNode!!.text = new.text
+                        rootVNode!!.sel = new.sel
+                    }
 
                     // Its possible that the new vnode's child is not the one that was patched right.
 
-                    println(JSON.stringify(vNode))
-                    println(JSON.stringify(newVNode))
-                    val parent = vNode.elm
-                    vNode = Snabbdom.patch(vNode, newVNode).also { new ->
-                        new.elm = parent
+
+//                    val parent = vNode.elm
+//                    s(vNode)
+//                    vNode.addHook("init") { vNode, _ ->
+//                        println("ADDED")
+//                        println(vNode.elm)
+//                    }
+
+                    vNode = Snabbdom.patch(rootVNode, newVNode).also { new ->
+//                        new.elm = parent
                     }
+//                    var p = vNode
+//                    while (p != null) {
+//                        p =
+//                    }
 
                 }
             }
