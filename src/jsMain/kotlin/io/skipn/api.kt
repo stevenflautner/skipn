@@ -19,11 +19,9 @@ object Api {
         body: Any,
         noinline headers: (kotlin.js.Json.() -> Unit)? = null
     ): RESP {
-        val host = window.location.hostname
-        val currentPort = window.location.port.toInt()
-        val port = if (DEV) currentPort + 1 else currentPort
-
-        val url = "http://$host:$port${endpoint.route}"
+        val url = if (!DEV) {
+            "${window.location.origin}${endpoint.route}"
+        } else "http://${window.location.hostname}:${window.location.port}${endpoint.route}"
 
         val credentials = if (!DEV) RequestCredentials.SAME_ORIGIN
         else RequestCredentials.INCLUDE

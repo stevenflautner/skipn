@@ -75,8 +75,6 @@ inline fun <reified REQ: Any, reified RESP: Any> Routing.formEndpoint(
             val customValidator = FormValidator(requestMap).apply {
                 validator()
             }
-            println("THIS IS THE VALUES")
-            println(requestMap)
             if (customValidator.validationError != null) {
                 throw Exception("""
 Form validation failed on the server, this should not happen if you used Skipn's form

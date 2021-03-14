@@ -33,6 +33,7 @@ actual fun HEAD.skipnHead() {
         type = "text/javascript"
         src = "/public/${Skipn.buildHash}.js"
         attributes["id"] = "skipn-main-script"
+        defer = true
     }
 }
 
