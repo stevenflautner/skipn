@@ -11,7 +11,10 @@ import io.skipn.observers.classesOf
 import io.skipn.observers.divOf
 import io.skipn.provide.locate
 import io.skipn.provide.pin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.html.*
 import kotlin.reflect.KProperty
@@ -20,7 +23,7 @@ expect suspend inline fun <reified RESP: Any> postForm(state: FormState<RESP>): 
 
 sealed class FormField<T: Any?>
 
-typealias FormValidatorFunc = FormValidator.() -> Unit
+typealias FormValidatorFunc = suspend FormValidator.() -> Unit
 
 class ValueField<T: Any?>(
         val value: T
@@ -100,11 +103,12 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         inputs[property.name] = ValueField(value)
     }
 
-    private fun validateAllCustom(): HashMap<String, String> {
+    private suspend fun validateAllCustom(): HashMap<String, String> {
         return hashMapOf<String, String>().apply {
             validateCustom(endpoint.validator)?.let {
                 putAll(it)
             }
+
             validators.forEach {
                 validateCustom(it)?.let { validator ->
                     putAll(validator)
@@ -113,7 +117,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         }
     }
 
-    fun validateTouched() {
+    suspend fun validateTouched() {
         val custom = validateAllCustom()
 
         inputs.filter { (it.value as? InputField<*>)?.touched ?: false }.forEach {
@@ -129,7 +133,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         }
     }
 
-    fun validateAll(): Boolean {
+    suspend fun validateAll(): Boolean {
         var valid = true
 
         val custom = validateAllCustom()
@@ -154,7 +158,7 @@ class FormState<RESP: Any>(val endpoint: FormEndpoint<*, RESP>) {
         return valid
     }
 
-    private fun validateCustom(_validator: FormValidatorFunc?) : Map<String, String>? {
+    private suspend fun validateCustom(_validator: FormValidatorFunc?) : Map<String, String>? {
         val validator = _validator ?: return null
 
         // Create snapshot of every input value
@@ -251,7 +255,7 @@ class FormValidator(val inputs: Map<String, Any?>) {
     val validationError: Map<String, String>?
     get() = _validationError
 
-    inline fun <reified T: Any?> validate(input: KProperty<T>, checkAgainst: InputValidator.(T) -> Unit) {
+    suspend inline fun <reified T: Any?> validate(input: KProperty<T>, crossinline checkAgainst: suspend InputValidator.(T) -> Unit) {
         InputValidator(inputs).apply {
             valueFor(input)?.let {
                 checkAgainst(it)
@@ -323,8 +327,9 @@ inline fun <reified RESP: Any> FlowContent.Form(
 
 fun FlowContent.touchAndValidate(state: FormState<*>, input: InputField<*>) {
     launch {
-        input.valueAttr.drop(1).collect {
+        input.valueAttr.drop(1).collectLatest {
             state.touch(input)
+            delay(400)
             state.validateTouched()
         }
     }

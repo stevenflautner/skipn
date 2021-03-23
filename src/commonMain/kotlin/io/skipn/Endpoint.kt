@@ -3,7 +3,7 @@
 
 package io.skipn
 
-import io.skipn.form.FormValidator
+import io.skipn.form.FormValidatorFunc
 import kotlin.jvm.JvmMultifileClass
 import kotlin.jvm.JvmName
 
@@ -16,7 +16,7 @@ expect abstract class EndpointBase<REQ: Any, RESP: Any>(cookies: List<String>?) 
 abstract class Endpoint<REQ: Any, RESP: Any>(cookies: List<String>? = null) : EndpointBase<REQ, RESP>(cookies)
 
 abstract class FormEndpoint<REQ: Any, RESP: Any>(
-    val validator: (FormValidator.() -> Unit)? = null,
+    val validator: FormValidatorFunc? = null,
     cookies: List<String>? = null
 ) : EndpointBase<REQ, RESP>(cookies)
 

@@ -3,6 +3,7 @@ package io.skipn.builder
 typealias Parameters = HashMap<String, String>
 
 expect fun String.encodeURLParameter(): String
+expect fun String.decodeURLParameter(): String
 
 fun Parameters.formUrlEncode(): String {
     return StringBuilder().apply {
@@ -27,12 +28,13 @@ class ParsedRoute(raw: String) {
     }
 
     private fun parseParameters(split: List<String>): Parameters = Parameters().apply {
-        split.getOrNull(1)?.let { query ->
+        split.getOrNull(1)?.let { _query ->
+            val query = _query.decodeURLParameter()
             val pairs: List<String> = query.split("&")
 
             for (pair in pairs) {
                 val idx = pair.indexOf("=")
-                put(pair.substring(0, idx), pair.substring(idx + 1))
+                put(pair.substring(0, idx), pair.substring(idx + 1).decodeURLParameter())
             }
         }
     }

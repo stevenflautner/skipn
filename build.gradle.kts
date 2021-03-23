@@ -6,7 +6,7 @@ plugins {
     id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.99593_9o3"
+version = "0.0.1ori5"
 val kversion = "1.4.2"
 
 repositories {
@@ -76,7 +76,7 @@ kotlin {
         val jsMain by getting {
             dependencies {
 
-                implementation(npm("morphdom", "2.6.1"))
+//                implementation(npm("morphdom", "2.6.1"))
 //                implementation(devNpm("postcss-loader", "4.0.0"))
 //                implementation(devNpm("postcss", "7.0.32"))
 //                implementation(devNpm("raw-loader", ""))

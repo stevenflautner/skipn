@@ -9,10 +9,7 @@ import kotlinx.browser.document
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.html.*
-import morphdom.MorphDomOptions
-import morphdom.morphdom
 import org.w3c.dom.Element
-import org.w3c.dom.HTMLElement
 
 @HtmlTagMarker
 actual fun <V, T> FlowContent.divOf(stateFlow: StateFlow<V>, node: DIV.(V) -> T) {
