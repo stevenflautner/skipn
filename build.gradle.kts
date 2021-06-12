@@ -3,22 +3,29 @@ import java.util.*
 plugins {
     kotlin("multiplatform") version "1.4.30-RC"
     id("maven-publish")
-    id("com.jfrog.bintray") version "1.8.4"
+//    id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.1ori5"
+version = "0.0.2"
 val kversion = "1.4.2"
 
 repositories {
     mavenCentral()
     jcenter()
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/ktor")
-    }
-    maven {
-        url = uri("https://dl.bintray.com/kotlin/kotlinx")
-    }
+
+//    val mavenUser: String by project
+//    val mavenPassword: String by project
+//    repositories {
+//        maven {
+//            url = uri("https://maven.pkg.jetbrains.space/nambda/p/tools/skipn")
+//            credentials {
+//                username = mavenUser
+//                password = mavenPassword
+//            }
+//        }
+//    }
 }
+
 kotlin {
     jvm {
         compilations.all {
@@ -116,45 +123,89 @@ val versionDescription = "Pre-release 0.0.1"
 val license = "MIT"
 val projVcsUrl = "https://github.com/stevenflautner/skipn.git"
 
+//publishing {
+//    publications {
+//        bintray {
+//            user = "stevenflautner"
+//            key = project.findProperty("bintrayKey").toString()
+//            publish = true
+//
+//            pkg.apply {
+//                repo = bintrayRepo
+//                name = repoName
+//                userOrg = "skipn"
+//                setLicenses("MIT")
+//                vcsUrl = projVcsUrl
+//                version.apply {
+//                    name = artifactVersion
+//                    desc = versionDescription
+//                    released = Date().toString()
+//                    vcsTag = artifactVersion
+//                }
+//            }
+//        }
+//    }
+//}
+
+//tasks.withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {
+//    dependsOn(tasks.getByName("publishToMavenLocal"))
+//    doFirst {
+//        setPublications(
+//            *publishing.publications
+//                .filterIsInstance<MavenPublication>()
+//                .map { publication ->
+//                    val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
+//                    if (moduleFile.exists()) {
+//                        publication.artifact(object : org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact(moduleFile) {
+//                            override fun getDefaultExtension() = "module"
+//                        })
+//                    }
+//                    publication.name
+//                }.toTypedArray()
+//        )
+//    }
+//}
+
+//afterEvaluate {
+//    configure<PublishingExtension> {
+//        publications.all {
+//            val mavenPublication = this as? MavenPublication
+//            mavenPublication?.artifactId =
+//                "${project.name}${"-$name".takeUnless { "kotlinMultiplatform" in name }.orEmpty()}"
+//        }
+//    }
+//}
+
+//// The root publication also needs a sources JAR as it does not have one by default
+//val sourcesJar by tasks.creating(Jar::class) {
+//    archiveClassifier.value("sources")
+//}
+
 publishing {
     publications {
-        bintray {
-            user = "stevenflautner"
-            key = project.findProperty("bintrayKey").toString()
-            publish = true
+//        create<MavenPublication>("maven") {
+//            groupId = rootProject.group.toString()
+//            artifactId = rootProject.name
+//            version = version
+//            from(components["java"])
+//
+////            artifact(sourcesJar)
+//        }
+    }
 
-            pkg.apply {
-                repo = bintrayRepo
-                name = repoName
-                userOrg = "skipn"
-                setLicenses("MIT")
-                vcsUrl = projVcsUrl
-                version.apply {
-                    name = artifactVersion
-                    desc = versionDescription
-                    released = Date().toString()
-                    vcsTag = artifactVersion
-                }
+    val mavenUser: String by project
+    val mavenPassword: String by project
+
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.jetbrains.space/nambda/p/tools/skipn")
+            credentials {
+                username = mavenUser
+                password = mavenPassword
             }
         }
     }
 }
 
-tasks.withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {
-    dependsOn(tasks.getByName("publishToMavenLocal"))
-    doFirst {
-        setPublications(
-            *publishing.publications
-                .filterIsInstance<MavenPublication>()
-                .map { publication ->
-                    val moduleFile = buildDir.resolve("publications/${publication.name}/module.json")
-                    if (moduleFile.exists()) {
-                        publication.artifact(object : org.gradle.api.publish.maven.internal.artifact.FileBasedMavenArtifact(moduleFile) {
-                            override fun getDefaultExtension() = "module"
-                        })
-                    }
-                    publication.name
-                }.toTypedArray()
-        )
-    }
-}
+
+//publishing.publications.withType<MavenPublication>().getByName("kotlinMultiplatform").artifact(sourcesJar)
