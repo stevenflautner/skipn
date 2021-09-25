@@ -1,5 +1,6 @@
 package kotlinx.html
 
+import io.skipn.utils.imgSrcTransform
 import kotlinx.html.*
 import kotlinx.html.impl.*
 import kotlinx.html.attributes.*
@@ -47,7 +48,7 @@ inline fun PICTURE.source(classes : String? = null, crossinline block : SOURCE.(
  * Embedded image
  */
 @HtmlTagMarker
-inline fun PICTURE.img(alt : String? = null, src : String? = null, classes : String? = null, crossinline block : IMG.() -> Unit = {}) : Unit = IMG(attributesMapOf("alt", alt,"src", src,"class", classes), consumer).visit(block)
+inline fun PICTURE.img(alt : String? = null, src : String? = null, classes : String? = null, crossinline block : IMG.() -> Unit = {}) : Unit = IMG(attributesMapOf("alt", alt,"src", imgSrcTransform(src),"class", classes), consumer).visit(block)
 
 val PICTURE.asFlowContent : FlowContent
     get()  = this

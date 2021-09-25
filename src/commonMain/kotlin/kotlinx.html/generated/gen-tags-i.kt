@@ -1,5 +1,6 @@
 package kotlinx.html
 
+import io.skipn.utils.imgSrcTransform
 import kotlinx.html.*
 import kotlinx.html.impl.*
 import kotlinx.html.attributes.*

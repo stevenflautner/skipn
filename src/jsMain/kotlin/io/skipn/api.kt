@@ -14,6 +14,8 @@ import org.w3c.fetch.SAME_ORIGIN
 import kotlin.js.json
 
 object Api {
+    val devUrl get() = "http://${window.location.hostname}:${8081}"
+
     suspend inline fun <reified RESP: Any> post(
         endpoint: EndpointBase<*, RESP>,
         body: Any,
@@ -21,7 +23,9 @@ object Api {
     ): RESP {
         val url = if (!DEV) {
             "${window.location.origin}${endpoint.route}"
-        } else "http://${window.location.hostname}:${window.location.port}${endpoint.route}"
+        } else devUrl + endpoint.route
+
+        println("POST: { URL: $url }")
 
         val credentials = if (!DEV) RequestCredentials.SAME_ORIGIN
         else RequestCredentials.INCLUDE

@@ -1,13 +1,13 @@
 import java.util.*
 
 plugins {
-    kotlin("multiplatform") version "1.4.30-RC"
+    kotlin("multiplatform") version "1.6.0-M1"
     id("maven-publish")
 //    id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.2"
-val kversion = "1.4.2"
+version = "0.0.28"
+val kversion = "1.5.2"
 
 repositories {
     mavenCentral()
@@ -33,7 +33,7 @@ kotlin {
         }
         withJava()
     }
-    js(LEGACY) {
+    js(IR) {
         browser {
             testTask {
                 useKarma {

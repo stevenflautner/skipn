@@ -6,8 +6,11 @@ import io.skipn.utils.require
 import kotlinx.serialization.json.decodeFromJsonElement
 
 actual fun loadResourceString(src: String): String {
-    return require(src)
-        .default.toString()
+    return try {
+        require(src).default.toString()
+    } catch (e: dynamic) {
+        throw Exception(e.toString())
+    }
 }
 
 actual class SkipnResources actual constructor() {

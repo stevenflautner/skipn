@@ -1,5 +1,6 @@
 package kotlinx.html
 
+import io.skipn.utils.imgSrcTransform
 import kotlinx.html.*
 import kotlinx.html.impl.*
 import kotlinx.html.attributes.*
@@ -337,7 +338,7 @@ inline fun <T, C : TagConsumer<T>> C.iframe(sandbox : IframeSandbox? = null, cla
  * Embedded image
  */
 @HtmlTagMarker
-inline fun <T, C : TagConsumer<T>> C.img(alt : String? = null, src : String? = null, classes : String? = null, crossinline block : IMG.() -> Unit = {}) : T = IMG(attributesMapOf("alt", alt,"src", src,"class", classes), this).visitAndFinalize(this, block)
+inline fun <T, C : TagConsumer<T>> C.img(alt : String? = null, src : String? = null, classes : String? = null, crossinline block : IMG.() -> Unit = {}) : T = IMG(attributesMapOf("alt", alt,"src", imgSrcTransform(src),"class", classes), this).visitAndFinalize(this, block)
 
 /**
  * Form control
