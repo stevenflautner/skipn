@@ -1,29 +1,15 @@
 import java.util.*
 
 plugins {
-    kotlin("multiplatform") version "1.6.0-M1"
+    kotlin("multiplatform") version "1.6.10"
     id("maven-publish")
-//    id("com.jfrog.bintray") version "1.8.4"
 }
 group = "io.skipn"
-version = "0.0.28"
-val kversion = "1.5.2"
+version = "0.0.30"
 
 repositories {
     mavenCentral()
     jcenter()
-
-//    val mavenUser: String by project
-//    val mavenPassword: String by project
-//    repositories {
-//        maven {
-//            url = uri("https://maven.pkg.jetbrains.space/nambda/p/tools/skipn")
-//            credentials {
-//                username = mavenUser
-//                password = mavenPassword
-//            }
-//        }
-//    }
 }
 
 kotlin {
@@ -47,14 +33,14 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kversion")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.0.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 //                implementation("io.ktor:ktor-client-core:$kversion")
 //                implementation("io.ktor:ktor-client-json:$kversion")
 //                implementation("io.ktor:ktor-client-serialization:$kversion")
 //                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.1.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
             }
         }
         val commonTest by getting {
